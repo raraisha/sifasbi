@@ -35,7 +35,7 @@ export default function LoginPage() {
       // Redirect sesuai role
       switch (data.role) {
         case 'siswa':
-          router.push('/dashboard-siswa')
+          router.push('/dashboard-siswa/dashboard')
           break
         case 'guru':
           router.push('/dashboard-guru')
