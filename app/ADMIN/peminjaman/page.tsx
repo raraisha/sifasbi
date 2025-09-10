@@ -4,7 +4,6 @@ import Sidebar from '../../components/Sidebar'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-
 export default function KelolaPeminjamanPage() {
   const router = useRouter()
   const [dataPeminjaman, setDataPeminjaman] = useState<any[]>([])
@@ -51,96 +50,110 @@ export default function KelolaPeminjamanPage() {
     .filter(item => (filter ? item.status === filter : true))
 
   return (
-    <div className="flex min-h-screen bg-[#F9F8FD]">
-      <Sidebar />
-      <main className="flex-1 p-6">
-        <h1 className="text-2xl font-semibold mb-6 text-black">Kelola Peminjaman Fasilitas</h1>
+    <div className="flex flex-col min-h-screen bg-[#F9F8FD] text-black">
+      <div className="flex flex-1 flex-col lg:flex-row">
+        {/* Sidebar collapse di mobile */}
+        <Sidebar />
+        <main className="flex-1 p-6">
+          {/* Navbar Atas */}
+          <div className="bg-white shadow px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
+            <h1 className="text-lg font-semibold">Kelola Peminjaman Fasilitas</h1>
+            <span className="text-sm text-gray-500">
+              {new Date().toLocaleDateString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })}
+            </span>
+          </div>
 
-        {/* Search & Filter */}
-        <div className="flex gap-4 mb-4">
-          <input
-            type="text"
-            placeholder="Search nama peminjam..."
-            className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 text-black"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <select
-            className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 text-black"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            <option value="">Semua</option>
-            <option value="Menunggu">Menunggu</option>
-            <option value="Disetujui">Disetujui</option>
-            <option value="Ditolak">Ditolak</option>
-            <option value="Selesai">Selesai</option>
-          </select>
-        </div>
+          {/* Search & Filter */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Search nama peminjam..."
+              className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 text-black"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <select
+              className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 text-black"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            >
+              <option value="">Semua</option>
+              <option value="Menunggu">Menunggu</option>
+              <option value="Disetujui">Disetujui</option>
+              <option value="Ditolak">Ditolak</option>
+              <option value="Selesai">Selesai</option>
+            </select>
+          </div>
 
-        {/* Table */}
-        <div className="bg-white p-4 rounded-lg shadow overflow-x-auto">
-          <table className="w-full text-sm text-left border-collapse text-black">
-            <thead>
-              <tr className="border-b">
-                <th className="px-4 py-2">ID</th>
-                <th className="px-4 py-2">Peminjam</th>
-                <th className="px-4 py-2">Fasilitas</th>
-                <th className="px-4 py-2">Waktu Pinjam</th>
-                <th className="px-4 py-2">Waktu Selesai</th>
-                <th className="px-4 py-2">Status</th>
-                <th className="px-4 py-2">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.map((row) => (
-                <tr key={row.id_peminjaman} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2">{row.id_peminjaman}</td>
-                  <td className="px-4 py-2">{row.nama_peminjam}</td>
-                  <td className="px-4 py-2">{row.nama_barang}</td>
-                  <td className="px-4 py-2">{formatWaktu(row.waktu_pinjam)}</td>
-                  <td className="px-4 py-2">{formatWaktu(row.waktu_selesai)}</td>
-                  <td className="px-4 py-2">{row.status}</td>
-                  <td className="px-4 py-2 flex gap-2">
-                    {row.status === 'Menunggu' && (
-                      <>
-                        <button
-                          onClick={() => updateStatus(row.id_peminjaman, 'Disetujui')}
-                          className="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
-                        >
-                          Terima
-                        </button>
-                        <button
-                          onClick={() => updateStatus(row.id_peminjaman, 'Ditolak')}
-                          className="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
-                        >
-                          Tolak
-                        </button>
-                      </>
-                    )}
-                    {row.status === 'Disetujui' && (
-                      <button
-                        onClick={() => updateStatus(row.id_peminjaman, 'Selesai')}
-                        className="bg-purple-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
-                      >
-                        Selesai
-                      </button>
-                    )}
-                  </td>
+          {/* Table */}
+          <div className="bg-white p-4 rounded-lg shadow overflow-x-auto">
+            <table className="w-full text-sm text-left border-collapse text-black">
+              <thead>
+                <tr className="border-b">
+                  <th className="px-4 py-2">ID</th>
+                  <th className="px-4 py-2">Peminjam</th>
+                  <th className="px-4 py-2">Fasilitas</th>
+                  <th className="px-4 py-2">Waktu Pinjam</th>
+                  <th className="px-4 py-2">Waktu Selesai</th>
+                  <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2">Aksi</th>
                 </tr>
-              ))}
+              </thead>
+              <tbody>
+                {filteredData.map((row) => (
+                  <tr key={row.id_peminjaman} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-2">{row.id_peminjaman}</td>
+                    <td className="px-4 py-2">{row.nama_peminjam}</td>
+                    <td className="px-4 py-2">{row.nama_barang}</td>
+                    <td className="px-4 py-2">{formatWaktu(row.waktu_pinjam)}</td>
+                    <td className="px-4 py-2">{formatWaktu(row.waktu_selesai)}</td>
+                    <td className="px-4 py-2">{row.status}</td>
+                    <td className="px-4 py-2 flex gap-2">
+                      {row.status === 'Menunggu' && (
+                        <>
+                          <button
+                            onClick={() => updateStatus(row.id_peminjaman, 'Disetujui')}
+                            className="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
+                          >
+                            Terima
+                          </button>
+                          <button
+                            onClick={() => updateStatus(row.id_peminjaman, 'Ditolak')}
+                            className="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
+                          >
+                            Tolak
+                          </button>
+                        </>
+                      )}
+                      {row.status === 'Disetujui' && (
+                        <button
+                          onClick={() => updateStatus(row.id_peminjaman, 'Selesai')}
+                          className="bg-purple-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
+                        >
+                          Selesai
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
 
-              {filteredData.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-center py-4 text-gray-500">
-                    Tidak ada data
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </main>
+                {filteredData.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="text-center py-4 text-gray-500">
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
     </div>
   )
 }
