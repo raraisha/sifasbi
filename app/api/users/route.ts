@@ -6,8 +6,8 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY! // server only, jangan expose ke client
 )
 
-type User = {
-  nis: number
+type Admin = {
+  nik: number
   nama: string
   role: string
 }
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const role = searchParams.get('role')
 
-    let query = supabase.from('users').select('nis, nama, role')
+    let query = supabase.from('admin').select('nik, nama, role')
 
     if (role) {
       query = query.eq('role', role)
@@ -25,9 +25,11 @@ export async function GET(req: Request) {
 
     const { data, error } = await query
 
+    console.log(data);
+
     if (error) throw error
 
-    return Response.json(data as User[])
+    return Response.json(data as Admin[])
   } catch (err) {
     console.error('API Error /users:', err)
     return Response.json({ error: 'Gagal mengambil data user' }, { status: 500 })
