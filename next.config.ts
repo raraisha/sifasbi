@@ -1,4 +1,4 @@
-import type { NextConfig } from "./pages/api/dashboard/node_modules/next";
+import type { NextConfig } from "next"; 
 
 const nextConfig = {
   eslint: {

@@ -14,8 +14,17 @@ export async function POST(req: Request) {
     const ruangan = formData.get("ruangan") as string
     const nama_barang = formData.get("nama_barang") as string
     const deskripsi = formData.get("deskripsi") as string
-    const kode_barang = formData.get("kode_barang") as string | null
     const foto = formData.get("foto") as File | null
+
+    console.log("Data diterima dari form:")
+    console.log({
+      id_siswa,
+      gedung,
+      ruangan,
+      nama_barang,
+      deskripsi,
+      adaFoto: !!foto,
+    })
 
     if (!id_siswa || !gedung || !ruangan || !deskripsi) {
       return NextResponse.json({ message: "Data wajib diisi" }, { status: 400 })
@@ -26,12 +35,13 @@ export async function POST(req: Request) {
       const buffer = await foto.arrayBuffer()
       const fileName = `kerusakan/${Date.now()}-${foto.name}`
       const { error: uploadError } = await supabase.storage
-        .from("uploads")
+        .from("kerusakan")
         .upload(fileName, buffer, { contentType: foto.type })
 
       if (uploadError) throw uploadError
 
-      url_gambar = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`
+      // perbaikan path public file
+      url_gambar = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/kerusakan/${fileName}`
     }
 
     const { error } = await supabase.from("pelaporan_kerusakan").insert([
@@ -40,10 +50,9 @@ export async function POST(req: Request) {
         gedung,
         ruangan,
         nama_barang,
-        kode_barang,
         deskripsi,
         url_gambar,
-        status: "pending", // default enum status
+        status: "pending",
       },
     ])
 
@@ -51,7 +60,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: "Laporan berhasil dikirim" })
   } catch (err) {
-    console.error(err)
+    console.error("Error kirim laporan:", err)
     return NextResponse.json({ message: "Gagal kirim laporan" }, { status: 500 })
   }
 }

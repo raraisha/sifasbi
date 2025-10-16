@@ -35,7 +35,7 @@ export async function GET(req: Request) {
       .from('peminjaman')
       .select('*', { count: 'exact', head: true })
       .eq('id_siswa', nis)
-      .gte('tanggal_pinjam', startOfMonth.toISOString())
+      .gte('tanggal_pengajuan', startOfMonth.toISOString())
 
     // Laporan kerusakan
     const { count: laporanKerusakan } = await supabase

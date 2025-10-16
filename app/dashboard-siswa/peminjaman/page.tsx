@@ -2,57 +2,68 @@
 
 import { useEffect, useState } from 'react'
 
-export default function PeminjamanPage() {
+export default function PengajuanPeminjamanPage() {
   const [fasilitas, setFasilitas] = useState<any[]>([])
   const [selected, setSelected] = useState<any>(null)
-  const [user, setUser] = useState<any>(null)
+  const [users, setUser] = useState<any>(null)
+  const [minTanggalPengajuan, setMinTanggalPengajuan] = useState<string>('')
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user')
+    const storedUser = localStorage.getItem('users')
     if (storedUser) setUser(JSON.parse(storedUser))
 
     fetch('/api/siswa/fasilitas')
       .then(res => res.json())
       .then(setFasilitas)
+
+    // minimal tanggal pengajuan = hari ini
+    const today = new Date().toISOString().split('T')[0]
+    setMinTanggalPengajuan(today)
   }, [])
 
   const ajukanPeminjaman = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
 
-    const res = await fetch('/api/peminjaman', {
+    const tanggal_pengajuan = formData.get('tanggal_pengajuan') as string
+    const waktu_pengembalian = formData.get('waktu_pengembalian') as string
+    const keperluan = formData.get('keperluan') as string
+
+    const res = await fetch('/api/siswa/peminjaman', {
       method: 'POST',
-      body: JSON.stringify({
-        id_siswa: user?.nis,
-        id_fasilitas: selected.id_fasilitas,
-        tanggal_pinjam: formData.get('tanggal_pinjam'),
-        tanggal_kembali: formData.get('tanggal_kembali'),
-        alasan: formData.get('alasan'),
-      }),
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id_siswa: users?.nis,
+        kode_inventaris: selected.kode_inventaris,
+        tanggal_pengajuan,
+        waktu_pengembalian,
+        keperluan,
+      }),
     })
+
+    const data = await res.json()
 
     if (res.ok) {
       alert('Peminjaman berhasil diajukan!')
       setSelected(null)
+    } else {
+      alert(data.error || 'Terjadi kesalahan, coba lagi.')
     }
   }
 
   const handleOutsideClick = (e: any) => {
-    if (e.target.id === 'modal-overlay') {
-      if (confirm('Yakin mau batalin?')) {
-        setSelected(null)
-      }
+    if (e.target.id === 'modal-overlay' && confirm('Yakin mau batalin?')) {
+      setSelected(null)
     }
   }
 
   return (
     <div className="px-6 py-8">
       <h1 className="text-3xl font-extrabold mb-8 text-black text-center">
-        Pinjam Fasilitas Yuk! 🏫
+        Ajukan Peminjaman Fasilitas 🏫
       </h1>
 
-      {/* Card List */}
+      {/* List fasilitas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {fasilitas.map(f => (
           <div
@@ -93,42 +104,54 @@ export default function PeminjamanPage() {
         >
           <div
             className="bg-white p-8 rounded-2xl shadow-2xl w-96 relative"
-            onClick={e => e.stopPropagation()} // biar klik dalam card gak nutup
+            onClick={e => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-6 text-center text-black">
-              Ajukan Peminjaman
+              Form Peminjaman
             </h2>
+
             <form onSubmit={ajukanPeminjaman} className="space-y-4">
               <p className="text-center font-semibold text-indigo-600 mb-4">
                 {selected.nama_fasilitas}
               </p>
+
               <div>
-                <label className="block text-sm font-medium mb-1 text-black">Tanggal Pinjam</label>
+                <label className="block text-sm font-medium mb-1 text-black">
+                  Tanggal Pengajuan
+                </label>
                 <input
                   type="date"
-                  name="tanggal_pinjam"
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                  name="tanggal_pengajuan"
+                  min={minTanggalPengajuan}
+                  className="w-full border rounded-lg px-3 py-2 text-black focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                   required
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium mb-1 text-black">Tanggal Kembali</label>
+                <label className="block text-sm font-medium mb-1 text-black">
+                  Waktu Pengembalian
+                </label>
                 <input
-                  type="date"
-                  name="tanggal_kembali"
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                  type="datetime-local"
+                  name="waktu_pengembalian"
+                  className="w-full border rounded-lg px-3 py-2 text-black focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                   required
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium mb-1 text-black">Alasan</label>
+                <label className="block text-sm font-medium mb-1 text-black">
+                  Keperluan
+                </label>
                 <textarea
-                  name="alasan"
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                  name="keperluan"
+                  className="w-full border rounded-lg px-3 py-2 text-black focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                   rows={2}
                   required
                 />
               </div>
+
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"

@@ -38,7 +38,7 @@ export default function SiswaLayout({ children }: { children: React.ReactNode })
           <Link href="/dashboard-siswa/dashboard" className="hover:underline">Home</Link>
           <Link href="/dashboard-siswa/peminjaman" className="hover:underline">Pinjam Fasilitas</Link>
           <Link href="/dashboard-siswa/lapor" className="hover:underline">Lapor Kerusakan</Link>
-          <Link href="/siswa/histori" className="hover:underline">Histori</Link>
+          <Link href="/dashboard-siswa/histori" className="hover:underline">Histori</Link>
         </div>
 
         {/* Tombol logout (desktop) */}

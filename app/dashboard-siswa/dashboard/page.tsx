@@ -31,9 +31,10 @@ export default function DashboardSiswa() {
       .then(res => res.json())
       .then(setAktivitas)
 
-    fetch(`/api/siswa/fasilitas?nis=${parsed.nis}`)
-      .then(res => res.json())
-      .then(setFasilitas)
+fetch(`/api/siswa/fasilitas/stats?nis=${parsed.nis}`)
+  .then(res => res.json())
+  .then(setFasilitas)
+
 
     fetch(`/api/siswa/bulanan?nis=${parsed.nis}`)
       .then(res => res.json())
@@ -67,7 +68,7 @@ export default function DashboardSiswa() {
           color="text-yellow-500"
         />
         <StatBox
-          title="Bulan Ini"
+          title="Peminjaman Bulan Ini"
           value={aktivitas.peminjamanBulanIni}
           color="text-green-600"
         />
@@ -85,25 +86,35 @@ export default function DashboardSiswa() {
           <h2 className="font-semibold text-base sm:text-lg mb-4 text-gray-800">
             Fasilitas yang Sering Kamu Pinjam
           </h2>
-          <div className="w-full max-w-[400px] mx-auto">
-            <Pie
-              data={{
-                labels: fasilitas.map(f => f.nama_fasilitas),
-                datasets: [
-                  {
-                    data: fasilitas.map(f => f.jumlah),
-                    backgroundColor: [
-                      '#8B5CF6',
-                      '#6366F1',
-                      '#EC4899',
-                      '#F59E0B',
-                      '#10B981',
-                    ],
-                  },
-                ],
-              }}
-            />
-          </div>
+ <div className="w-full max-w-[400px] mx-auto h-[300px]">
+  {fasilitas.length > 0 ? (
+    <Pie
+      data={{
+        labels: fasilitas.map(f => f.nama_fasilitas),
+        datasets: [
+          {
+            data: fasilitas.map(f => f.jumlah),
+            backgroundColor: ['#8B5CF6', '#6366F1', '#EC4899', '#F59E0B', '#10B981'],
+          },
+        ],
+      }}
+      options={{
+        maintainAspectRatio: false,
+        responsive: true,
+        animation: {
+          duration: 400, // bisa diset ke 0 kalau mau instan
+        },
+      }}
+    />
+  ) : (
+    <p className="text-center text-gray-500 py-6">
+      Belum ada data peminjaman
+    </p>
+  )}
+</div>
+
+
+          
         </div>
 
         {/* Bar Chart */}
