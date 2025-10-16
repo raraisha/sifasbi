@@ -1,4 +1,20 @@
-export default function SectionTable({ title, headers, rows }: { title: string; headers: string[]; rows: any[][] }) {
+'use client'
+
+import { useRouter } from 'next/navigation'
+
+export default function SectionTable({
+  title,
+  headers,
+  rows,
+  link, // 👈 prop baru
+}: {
+  title: string
+  headers: string[]
+  rows: any[][]
+  link: string
+}) {
+  const router = useRouter()
+
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
@@ -22,7 +38,10 @@ export default function SectionTable({ title, headers, rows }: { title: string; 
           </tbody>
         </table>
       </div>
-      <button className="mt-4 w-full py-2 text-white font-semibold rounded-md bg-gradient-to-r from-[#B36FF2] to-[#273B98] hover:opacity-90">
+      <button
+        onClick={() => router.push(link)} // 👈 arahkan ke prop link
+        className="mt-4 w-full py-2 text-white font-semibold rounded-md bg-gradient-to-r from-[#B36FF2] to-[#273B98] hover:opacity-90"
+      >
         Lihat Selengkapnya
       </button>
     </div>

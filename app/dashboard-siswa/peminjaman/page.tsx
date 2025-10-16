@@ -70,11 +70,14 @@ export default function PengajuanPeminjamanPage() {
             key={f.id_fasilitas}
             className="bg-white rounded-2xl shadow-md p-5 transition transform hover:scale-105 hover:shadow-xl"
           >
-            <img
-              src={f.gambar_url}
-              alt={f.nama_fasilitas}
-              className="rounded-xl mb-4 h-44 w-full object-cover"
-            />
+            <div className="aspect-square w-full">
+  <img
+    src={f.gambar_url}
+    alt={f.nama_fasilitas}
+    className="rounded-xl h-full w-full object-cover"
+  />
+</div>
+
             <h2 className="text-lg font-semibold text-black">{f.nama_fasilitas}</h2>
             <p className="text-sm text-black mt-1">
               Jumlah Tersedia: <span className="font-medium">{f.jumlah_tersedia}</span>
