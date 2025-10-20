@@ -52,7 +52,7 @@ export async function POST(req: Request) {
         nama_barang,
         deskripsi,
         url_gambar,
-        status: "pending",
+        status: "Menunggu Konfirmasi",
       },
     ])
 

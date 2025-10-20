@@ -21,8 +21,8 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Tombol Burger (hanya muncul di mobile) */}
-      <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white shadow">
+      {/* Header Mobile */}
+      <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white shadow-sm sticky top-0 z-50">
         <div className="flex items-center gap-2">
           <img src="/logo.png" alt="Logo" className="w-8" />
           <h1 className="text-lg font-bold">
@@ -36,51 +36,58 @@ export default function Sidebar() {
       </div>
 
       {/* Sidebar */}
-      <div
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow flex flex-col justify-between py-6 transform transition-transform duration-300 z-50 
-        ${open ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static`}
+      <aside
+        className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-white to-[#F9F8FD] shadow-xl flex flex-col justify-between 
+        transform transition-transform duration-300 z-50 
+        ${open ? 'translate-x-0' : '-translate-x-full'} 
+        lg:translate-x-0 lg:static`}
       >
-        <div>
-          {/* Logo (hidden di mobile karena sudah di header) */}
-          <div className="hidden lg:flex flex-col items-center mb-10">
-            <img src="/logo.png" alt="Logo" className="w-10 mb-2" />
-            <h1 className="text-xl font-bold">
-              <span className="text-[#B36FF2]">Si</span>
-              <span className="text-[#273B98]">FasBi</span>
-            </h1>
-          </div>
+        {/* Logo */}
+        <div className="flex flex-col items-center py-8 space-y-2">
+          <img src="/logo.png" alt="Logo" className="w-20 drop-shadow-md" />
+          <h1 className="text-xl font-bold tracking-tight">
+            <span className="text-[#B36FF2]">Si</span>
+            <span className="text-[#273B98]">FasBi</span>
+          </h1>
+        </div>
 
-          {/* Menu */}
-          <nav className="space-y-2">
-            {menu.map((item) => (
-              <Link key={item.label} href={item.href} passHref>
+        {/* Menu Navigasi */}
+        <nav className="flex-1 px-5 space-y-1 mt-4">
+          {menu.map((item) => {
+            const active = path === item.href
+            return (
+              <Link key={item.label} href={item.href}>
                 <div
-                  onClick={() => setOpen(false)} // biar nutup sidebar setelah klik
-                  className={`flex items-center px-5 py-2 rounded-md font-medium cursor-pointer transition ${
-                    path === item.href
-                      ? 'bg-[#EEE7FF] text-[#6C3BD9]'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-all cursor-pointer
+                    ${
+                      active
+                        ? 'bg-gradient-to-r from-[#B36FF2] to-[#7E9BFF] text-white shadow-md'
+                        : 'text-gray-700 hover:bg-[#F3EEFF] hover:text-[#6C3BD9]'
+                    }`}
                 >
-                  <span className="mr-3 text-lg">{item.icon}</span> {item.label}
+                  <span className="text-lg">{item.icon}</span>
+                  <span>{item.label}</span>
                 </div>
               </Link>
-            ))}
-          </nav>
-        </div>
+            )
+          })}
+        </nav>
 
         {/* Footer */}
-        <div className="px-5 text-xs text-gray-500 flex flex-col">
+        <div className="px-6 py-5 text-center bg-white/70 backdrop-blur-md rounded-t-2xl shadow-sm">
           <LogoutButton />
-          <p className="mt-4">© SMK Bina Informatika 2025. All Rights Reserved.</p>
+          <p className="mt-4 text-xs text-gray-500 leading-snug">
+            © 2025 SMK Bina Informatika <br /> All Rights Reserved
+          </p>
         </div>
-      </div>
+      </aside>
 
-      {/* Overlay hitam (kalau sidebar kebuka di mobile) */}
+      {/* Overlay untuk mobile */}
       {open && (
         <div
           onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
         />
       )}
     </>

@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Toaster, toast } from 'react-hot-toast'
 
 export default function PengajuanPeminjamanPage() {
   const [fasilitas, setFasilitas] = useState<any[]>([])
   const [selected, setSelected] = useState<any>(null)
   const [users, setUser] = useState<any>(null)
   const [minTanggalPengajuan, setMinTanggalPengajuan] = useState<string>('')
+  const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
     const storedUser = localStorage.getItem('users')
@@ -16,7 +18,6 @@ export default function PengajuanPeminjamanPage() {
       .then(res => res.json())
       .then(setFasilitas)
 
-    // minimal tanggal pengajuan = hari ini
     const today = new Date().toISOString().split('T')[0]
     setMinTanggalPengajuan(today)
   }, [])
@@ -33,7 +34,7 @@ export default function PengajuanPeminjamanPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id_siswa: users?.nis,
+        nis: users?.nis,
         kode_inventaris: selected.kode_inventaris,
         tanggal_pengajuan,
         waktu_pengembalian,
@@ -44,21 +45,35 @@ export default function PengajuanPeminjamanPage() {
     const data = await res.json()
 
     if (res.ok) {
-      alert('Peminjaman berhasil diajukan!')
+      toast.success('Peminjaman berhasil diajukan!')
       setSelected(null)
     } else {
-      alert(data.error || 'Terjadi kesalahan, coba lagi.')
+      toast.error(data.error || 'Terjadi kesalahan, coba lagi.')
     }
   }
 
   const handleOutsideClick = (e: any) => {
-    if (e.target.id === 'modal-overlay' && confirm('Yakin mau batalin?')) {
-      setSelected(null)
-    }
+    if (e.target.id === 'modal-overlay') setShowConfirm(true)
+  }
+
+  const handleBatal = () => {
+    setShowConfirm(true)
+  }
+
+  const handleConfirmYes = () => {
+    setShowConfirm(false)
+    setSelected(null)
+    toast.success('Dibatalkan')
+  }
+
+  const handleConfirmNo = () => {
+    setShowConfirm(false)
   }
 
   return (
     <div className="px-6 py-8">
+      <Toaster position="top-center" />
+
       <h1 className="text-3xl font-extrabold mb-8 text-black text-center">
         Ajukan Peminjaman Fasilitas 🏫
       </h1>
@@ -71,12 +86,12 @@ export default function PengajuanPeminjamanPage() {
             className="bg-white rounded-2xl shadow-md p-5 transition transform hover:scale-105 hover:shadow-xl"
           >
             <div className="aspect-square w-full">
-  <img
-    src={f.gambar_url}
-    alt={f.nama_fasilitas}
-    className="rounded-xl h-full w-full object-cover"
-  />
-</div>
+              <img
+                src={f.gambar_url}
+                alt={f.nama_fasilitas}
+                className="rounded-xl h-full w-full object-cover"
+              />
+            </div>
 
             <h2 className="text-lg font-semibold text-black">{f.nama_fasilitas}</h2>
             <p className="text-sm text-black mt-1">
@@ -158,9 +173,7 @@ export default function PengajuanPeminjamanPage() {
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    if (confirm('Yakin mau batalin?')) setSelected(null)
-                  }}
+                  onClick={handleBatal}
                   className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-100 transition text-black"
                 >
                   Batal
@@ -173,6 +186,31 @@ export default function PengajuanPeminjamanPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Batal */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[60]">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-72 text-center">
+            <p className="text-lg font-semibold mb-5 text-black">
+              Yakin mau batalin?
+            </p>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={handleConfirmYes}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+              >
+                Ya
+              </button>
+              <button
+                onClick={handleConfirmNo}
+                className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400 transition"
+              >
+                Tidak
+              </button>
+            </div>
           </div>
         </div>
       )}

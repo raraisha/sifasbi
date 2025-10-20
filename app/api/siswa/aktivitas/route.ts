@@ -19,13 +19,13 @@ export async function GET(req: Request) {
     const { count: totalPeminjaman } = await supabase
       .from('peminjaman')
       .select('*', { count: 'exact', head: true })
-      .eq('id_siswa', nis)
+      .eq('id_user', nis)
 
     // Peminjaman aktif
     const { count: peminjamanAktif } = await supabase
       .from('peminjaman')
       .select('*', { count: 'exact', head: true })
-      .eq('id_siswa', nis)
+      .eq('id_user', nis)
       .eq('status', 'Aktif')
 
     // Peminjaman bulan ini
@@ -34,7 +34,7 @@ export async function GET(req: Request) {
     const { count: peminjamanBulanIni } = await supabase
       .from('peminjaman')
       .select('*', { count: 'exact', head: true })
-      .eq('id_siswa', nis)
+      .eq('id_user', nis)
       .gte('tanggal_pengajuan', startOfMonth.toISOString())
 
     // Laporan kerusakan

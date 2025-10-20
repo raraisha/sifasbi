@@ -19,7 +19,6 @@ export async function GET() {
         url_gambar,
         gedung,
         deskripsi,
-        kode_barang,
         alasan_penolakan,
         waktu_dibuat,
         ruangan,

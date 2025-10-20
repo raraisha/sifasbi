@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     const { data, error } = await supabase
       .from('peminjaman')
       .select('nama_barang, id_peminjaman')
-      .eq('id_siswa', nis)
+      .eq('id_user', nis)
 
     if (error) throw error
 

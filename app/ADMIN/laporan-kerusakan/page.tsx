@@ -3,6 +3,7 @@
 import Sidebar from '../../components/Sidebar'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast, Toaster } from 'react-hot-toast'
 
 export default function LaporanKerusakanPage() {
   const router = useRouter()
@@ -11,8 +12,6 @@ export default function LaporanKerusakanPage() {
   const [filter, setFilter] = useState('')
   const [namaUser, setNamaUser] = useState('')
   const [selectedLaporan, setSelectedLaporan] = useState<any | null>(null)
-
-  // State untuk edit status modal
   const [editStatus, setEditStatus] = useState<string | null>(null)
   const [updating, setUpdating] = useState(false)
 
@@ -44,16 +43,43 @@ export default function LaporanKerusakanPage() {
     fetchData()
   }, [router])
 
-  // Sync editStatus saat modal terbuka
   useEffect(() => {
     if (selectedLaporan) {
       setEditStatus(selectedLaporan.status)
     }
   }, [selectedLaporan])
 
-  // Update status ke backend
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('/api/dashboard/laporan-kerusakan')
+        if (!res.ok) return
+        const latestData = await res.json()
+
+        if (latestData.length > dataKerusakan.length) {
+          toast.success('Ada laporan baru masuk!')
+        }
+
+        setDataKerusakan(latestData)
+      } catch (err) {
+        console.error(err)
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [dataKerusakan])
+
   const handleStatusChange = async (newStatus: string) => {
     if (!selectedLaporan) return
+    let alasan = ''
+    if (newStatus === 'Ditolak') {
+      alasan = prompt('Masukkan alasan penolakan:')
+      if (!alasan || alasan.trim() === '') {
+        toast.error('Alasan penolakan wajib diisi!')
+        return
+      }
+    }
+
     setEditStatus(newStatus)
     setUpdating(true)
     try {
@@ -62,24 +88,28 @@ export default function LaporanKerusakanPage() {
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ status: newStatus, alasan }),
         }
       )
+
       if (!res.ok) throw new Error('Gagal update status')
 
-      // Update state lokal supaya UI langsung berubah
       setDataKerusakan((prev) =>
         prev.map((item) =>
           item.id_pelaporan === selectedLaporan.id_pelaporan
-            ? { ...item, status: newStatus }
+            ? { ...item, status: newStatus, alasan_penolakan: alasan }
             : item
         )
       )
-      setSelectedLaporan((prev) => prev && { ...prev, status: newStatus })
+      setSelectedLaporan((prev) =>
+        prev && { ...prev, status: newStatus, alasan_penolakan: alasan }
+      )
+
+      toast.success('Status berhasil diperbarui!')
     } catch (error) {
       console.error(error)
-      alert('Gagal update status, coba lagi ya.')
-      setEditStatus(selectedLaporan.status) // rollback status
+      toast.error('Gagal update status, coba lagi ya.')
+      setEditStatus(selectedLaporan.status)
     } finally {
       setUpdating(false)
     }
@@ -87,25 +117,36 @@ export default function LaporanKerusakanPage() {
 
   const filteredData = dataKerusakan
     .filter((item: any) =>
-      item.id_siswa?.toLowerCase().includes(search.toLowerCase())
+      (item.id_siswa?.toLowerCase().includes(search.toLowerCase()) ||
+        item.nama_siswa?.toLowerCase().includes(search.toLowerCase()))
     )
     .filter((item: any) => (filter ? item.status === filter : true))
 
+  const tanggalSekarang = new Date().toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F9F8FD] text-black">
+      <Toaster position="top-right" />
+
       <div className="flex flex-1 flex-col lg:flex-row">
-        {/* Sidebar collapse di mobile */}
         <Sidebar />
         <main className="flex-1 p-6">
-          <h1 className="text-2xl font-semibold mb-6 text-black">
-            Kelola Laporan Kerusakan
-          </h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-semibold text-black">
+              Kelola Laporan Kerusakan
+            </h1>
+            <p className="text-gray-600 text-sm">{tanggalSekarang}</p>
+          </div>
 
-          {/* Search & Filter */}
           <div className="flex gap-4 mb-4">
             <input
               type="text"
-              placeholder="Search by ID Siswa..."
+              placeholder="Cari ID atau Nama Siswa..."
               className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 text-black"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -119,16 +160,17 @@ export default function LaporanKerusakanPage() {
               <option value="Menunggu">Menunggu</option>
               <option value="Diproses">Diproses</option>
               <option value="Selesai">Selesai</option>
+              <option value="Ditolak">Ditolak</option>
             </select>
           </div>
 
-          {/* Table */}
           <div className="bg-white p-4 rounded-lg shadow overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse text-black">
               <thead>
                 <tr className="border-b">
                   <th className="px-4 py-2">ID</th>
-                  <th className="px-4 py-2">ID Siswa</th>
+                  <th className="px-4 py-2">NIS</th>
+                  <th className="px-4 py-2">Nama Siswa</th>
                   <th className="px-4 py-2">Nama Barang</th>
                   <th className="px-4 py-2">Waktu Lapor</th>
                   <th className="px-4 py-2">Ruangan</th>
@@ -144,6 +186,7 @@ export default function LaporanKerusakanPage() {
                   >
                     <td className="px-4 py-2">{row.id_pelaporan}</td>
                     <td className="px-4 py-2">{row.id_siswa}</td>
+                    <td className="px-4 py-2">{row.nama_siswa}</td>
                     <td className="px-4 py-2">{row.nama_barang}</td>
                     <td className="px-4 py-2">
                       {formatWaktu(row.waktu_dibuat)}
@@ -163,10 +206,7 @@ export default function LaporanKerusakanPage() {
 
                 {filteredData.length === 0 && (
                   <tr>
-                    <td
-                      colSpan={7}
-                      className="text-center py-4 text-gray-500"
-                    >
+                    <td colSpan={8} className="text-center py-4 text-gray-500">
                       Tidak ada data
                     </td>
                   </tr>
@@ -175,38 +215,35 @@ export default function LaporanKerusakanPage() {
             </table>
           </div>
 
-          {/* Modal Detail Laporan */}
           {selectedLaporan && (
             <div
-              className="fixed inset-0 z-50 flex justify-center items-start pt-20 overflow-y-auto"
-              style={{
-                backdropFilter: 'blur(6px)',
-                backgroundColor: 'rgba(0,0,0,0.3)',
-              }}
+              className="fixed inset-0 z-50 flex justify-center items-center bg-black/30 backdrop-blur-sm"
             >
-              <div className="bg-white rounded-lg p-6 max-w-md w-full relative shadow-2xl mb-10">
+              <div className="bg-white rounded-xl p-6 w-[700px] shadow-2xl relative flex gap-6">
                 <button
                   onClick={() => setSelectedLaporan(null)}
                   className="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-2xl font-bold"
-                  aria-label="Close modal"
                 >
                   ×
                 </button>
-                <h2 className="text-center font-extrabold mb-5 text-xl text-gray-900">
-                  Detail Laporan ID {selectedLaporan.id_pelaporan}
-                </h2>
-                {selectedLaporan.foto_url && (
+
+                {selectedLaporan.url_gambar && (
                   <img
-                    src={selectedLaporan.foto_url}
+                    src={selectedLaporan.url_gambar}
                     alt="Foto Kerusakan"
-                    className="w-48 h-48 object-cover mx-auto mb-6 rounded-lg border border-gray-300 shadow-sm"
+                    className="w-60 h-60 object-cover rounded-lg border border-gray-300 shadow-sm"
                   />
                 )}
-                <div className="space-y-4 text-gray-800">
+
+                <div className="flex-1 space-y-3 text-gray-800">
+                  <h2 className="text-lg font-extrabold mb-2 text-gray-900 text-center">
+                    Detail Laporan ID {selectedLaporan.id_pelaporan}
+                  </h2>
+
                   {[
                     { label: 'NIS Pelapor', value: selectedLaporan.id_siswa },
-                    { label: 'Nama Pelapor', value: selectedLaporan.nama_pelapor },
-                    { label: 'Fasilitas', value: selectedLaporan.fasilitas },
+                    { label: 'Nama Siswa', value: selectedLaporan.nama_siswa },
+                    { label: 'Nama Barang', value: selectedLaporan.nama_barang },
                     { label: 'Gedung', value: selectedLaporan.gedung },
                     { label: 'Ruangan', value: selectedLaporan.ruangan },
                   ].map(({ label, value }) => (
@@ -220,15 +257,17 @@ export default function LaporanKerusakanPage() {
                       />
                     </div>
                   ))}
+
                   <div>
                     <label className="block font-semibold mb-1">Deskripsi</label>
                     <textarea
                       value={selectedLaporan.deskripsi || ''}
                       readOnly
                       className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-50 text-gray-700"
-                      rows={3}
+                      rows={2}
                     />
                   </div>
+
                   <div>
                     <label className="block font-semibold mb-1">Status</label>
                     <select
@@ -237,29 +276,28 @@ export default function LaporanKerusakanPage() {
                       disabled={updating}
                       className="w-full border rounded px-3 py-1"
                     >
-                      <option value="Konfirmasi">Konfirmasi</option>
-                      <option value="Menunggu Konfirmasi">
-                        Menunggu Konfirmasi
-                      </option>
+                      <option value="Menunggu">Menunggu</option>
+                      <option value="Diproses">Diproses</option>
+                      <option value="Selesai">Selesai</option>
                       <option value="Ditolak">Ditolak</option>
                     </select>
                   </div>
-                  {editStatus === 'Ditolak' && (
+
+                  {selectedLaporan.alasan_penolakan && (
                     <div>
-                      <label className="block font-semibold mb-1">
-                        Alasan Penolakan
-                      </label>
+                      <label className="block font-semibold mb-1">Alasan Penolakan</label>
                       <textarea
                         value={selectedLaporan.alasan_penolakan || ''}
                         readOnly
-                        className="w-full border rounded px-3 py-1"
+                        className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-50 text-gray-700"
                         rows={2}
                       />
                     </div>
                   )}
+
                   <button
                     onClick={() => setSelectedLaporan(null)}
-                    className="mt-6 w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition"
+                    className="mt-4 w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition"
                   >
                     Tutup
                   </button>
@@ -273,7 +311,6 @@ export default function LaporanKerusakanPage() {
   )
 }
 
-// pindahin ke atas kalau mau lebih aman
 function formatWaktu(waktu: string) {
   const t = new Date(waktu)
   return `${t.toLocaleDateString('id-ID', {

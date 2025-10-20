@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     const {
-      id_siswa, // ganti dari id_siswa ke id_user
+      id_user, // ganti dari id_user karena di DB adanya nis
       kode_inventaris,
       tanggal_pengajuan,
       waktu_pengembalian,
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     // 2. Insert ke tabel peminjaman
     const { error: errInsert } = await supabase.from('peminjaman').insert([
       {
-        id_siswa, // disesuaikan
+        id_user, // disesuaikan
         kode_inventaris,
         tanggal_pengajuan,
         waktu_pengembalian,
