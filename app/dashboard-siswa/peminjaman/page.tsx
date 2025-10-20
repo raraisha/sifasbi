@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Toaster, toast } from 'react-hot-toast'
+import WhatsAppButton from '../../components/WhatsAppButton'
 
 export default function PengajuanPeminjamanPage() {
   const [fasilitas, setFasilitas] = useState<any[]>([])
@@ -214,6 +215,9 @@ export default function PengajuanPeminjamanPage() {
           </div>
         </div>
       )}
+            <div className="mt-8 flex justify-center">
+        <WhatsAppButton />
+      </div>
     </div>
   )
 }

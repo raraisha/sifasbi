@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Toaster, toast } from 'react-hot-toast'
 import { Building2, MapPin, Package, FileText, Image as ImageIcon } from 'lucide-react'
+import WhatsAppButton from '../../components/WhatsAppButton'
 
 interface UserData {
   id_siswa?: string
@@ -176,6 +177,9 @@ export default function LaporanKerusakanPage() {
             {loading ? "Mengirim..." : "Kirim Laporan"}
           </button>
         </form>
+      </div>
+            <div className="mt-8 flex justify-center">
+        <WhatsAppButton />
       </div>
     </div>
   )

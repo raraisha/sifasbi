@@ -12,7 +12,7 @@ const menu = [
   { label: 'Peminjaman', icon: <FiBook />, href: '/ADMIN/peminjaman' },
   { label: 'Kelola Inventaris', icon: <FiArchive />, href: '/ADMIN/kelola-inventaris' },
   { label: 'Histori Data', icon: <FiBook />, href: '/ADMIN/log-aktivitas' },
-  { label: 'Laporan & Statistik', icon: <FiBarChart2 />, href: '#' },
+  { label: 'Laporan & Statistik', icon: <FiBarChart2 />, href: '/ADMIN/statistik' },
 ]
 
 export default function Sidebar() {

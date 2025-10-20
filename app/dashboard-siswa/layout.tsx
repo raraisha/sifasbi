@@ -84,7 +84,7 @@ export default function SiswaLayout({ children }: { children: React.ReactNode })
               Lapor Kerusakan
             </Link>
             <Link
-              href="/siswa/histori"
+              href="/dashboard-siswa/histori"
               className="hover:underline"
               onClick={() => setMenuOpen(false)}
             >

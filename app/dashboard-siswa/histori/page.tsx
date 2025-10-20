@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ClipboardList, Wrench, Clock } from 'lucide-react'
 import { Toaster, toast } from 'react-hot-toast'
+import WhatsAppButton from '../../components/WhatsAppButton'
 
 interface UserData {
   nis?: string
@@ -181,6 +182,9 @@ export default function HistoryPage() {
             )}
           </div>
         )}
+      </div>
+            <div className="mt-8 flex justify-center">
+        <WhatsAppButton />
       </div>
     </div>
   )

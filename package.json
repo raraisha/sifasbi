@@ -12,6 +12,9 @@
     "@supabase/supabase-js": "^2.54.0",
     "aos": "^2.3.4",
     "chart.js": "^4.5.0",
+    "file-saver": "^2.0.5",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
     "lucide-react": "^0.545.0",
     "mysql2": "^3.14.3",
     "next": "^15.4.5",
@@ -20,7 +23,8 @@
     "react-dom": "19.1.0",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
-    "recharts": "^3.2.1"
+    "recharts": "^3.2.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
