@@ -8,38 +8,49 @@ export default function PengajuanPeminjamanPage() {
   const [fasilitas, setFasilitas] = useState<any[]>([])
   const [selected, setSelected] = useState<any>(null)
   const [users, setUser] = useState<any>(null)
-  const [minTanggalPengajuan, setMinTanggalPengajuan] = useState<string>('')
+  const [tanggalPengajuan, setTanggalPengajuan] = useState<string>('')
   const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
+    // Ambil user dari localStorage
     const storedUser = localStorage.getItem('users')
     if (storedUser) setUser(JSON.parse(storedUser))
 
+    // Ambil data fasilitas
     fetch('/api/siswa/fasilitas')
       .then(res => res.json())
       .then(setFasilitas)
 
+    // Set tanggal hari ini (otomatis)
     const today = new Date().toISOString().split('T')[0]
-    setMinTanggalPengajuan(today)
+    setTanggalPengajuan(today)
   }, [])
 
   const ajukanPeminjaman = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-
-    const tanggal_pengajuan = formData.get('tanggal_pengajuan') as string
-    const waktu_pengembalian = formData.get('waktu_pengembalian') as string
     const keperluan = formData.get('keperluan') as string
+
+    if (!selected) {
+      toast.error('Pilih fasilitas terlebih dahulu.')
+      return
+    }
+
+    if (!users?.nis) {
+      toast.error('Data pengguna tidak ditemukan.')
+      return
+    }
 
     const res = await fetch('/api/siswa/peminjaman', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        nis: users?.nis,
+        nis: users.nis,
         kode_inventaris: selected.kode_inventaris,
-        tanggal_pengajuan,
-        waktu_pengembalian,
+        tanggal_pengajuan: tanggalPengajuan,
+        waktu_pengembalian: null,
         keperluan,
+        status: 'Dipinjam',
       }),
     })
 
@@ -134,6 +145,7 @@ export default function PengajuanPeminjamanPage() {
                 {selected.nama_fasilitas}
               </p>
 
+              {/* Tanggal pengajuan otomatis */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-black">
                   Tanggal Pengajuan
@@ -141,24 +153,13 @@ export default function PengajuanPeminjamanPage() {
                 <input
                   type="date"
                   name="tanggal_pengajuan"
-                  min={minTanggalPengajuan}
-                  className="w-full border rounded-lg px-3 py-2 text-black focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                  required
+                  value={tanggalPengajuan}
+                  readOnly
+                  className="w-full border rounded-lg px-3 py-2 text-gray-500 bg-gray-100 cursor-not-allowed"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1 text-black">
-                  Waktu Pengembalian
-                </label>
-                <input
-                  type="datetime-local"
-                  name="waktu_pengembalian"
-                  className="w-full border rounded-lg px-3 py-2 text-black focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                  required
-                />
-              </div>
-
+              {/* Keperluan */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-black">
                   Keperluan
@@ -171,6 +172,7 @@ export default function PengajuanPeminjamanPage() {
                 />
               </div>
 
+              {/* Tombol aksi */}
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
@@ -215,7 +217,9 @@ export default function PengajuanPeminjamanPage() {
           </div>
         </div>
       )}
-            <div className="mt-8 flex justify-center">
+
+      {/* WhatsApp Button */}
+      <div className="mt-8 flex justify-center">
         <WhatsAppButton />
       </div>
     </div>
