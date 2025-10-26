@@ -10,60 +10,75 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     const {
-      id_user, // ganti dari id_user karena di DB adanya nis
+      nis,
       kode_inventaris,
-      tanggal_pengajuan,
-      waktu_pengembalian,
-      keperluan
+      tanggal_pinjam,
+      waktu_selesai,
+      keperluan,
+      status,
     } = body
 
-    console.log('Data masuk:', body)
+    console.log('Data diterima:', body)
 
-    // 1. Cek stok fasilitas
+    if (!nis || !kode_inventaris || !tanggal_pinjam || !waktu_selesai || !keperluan) {
+      return NextResponse.json({ error: 'Semua field wajib diisi.' }, { status: 400 })
+    }
+
+    // === Ambil data user dari tabel users ===
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('nama, email, nis')
+      .eq('nis', nis)
+      .single()
+
+    if (userError || !userData) {
+      console.error('User tidak ditemukan:', userError)
+      return NextResponse.json({ error: 'User tidak ditemukan di database.' }, { status: 404 })
+    }
+
+    // === Ambil data fasilitas untuk nama_barang & stok ===
     const { data: fasilitas, error: errFasilitas } = await supabase
       .from('fasilitas')
-      .select('jumlah_tersedia')
+      .select('nama_fasilitas, jumlah_tersedia')
       .eq('kode_inventaris', kode_inventaris)
       .single()
 
-    if (errFasilitas) {
-      console.error('Error fasilitas:', errFasilitas)
-      throw new Error('Gagal ambil data fasilitas')
-    }
+    if (errFasilitas) throw new Error('Gagal mengambil data fasilitas.')
+    if (!fasilitas || fasilitas.jumlah_tersedia <= 0)
+      throw new Error('Fasilitas tidak tersedia.')
 
-    if (!fasilitas || fasilitas.jumlah_tersedia <= 0) {
-      throw new Error('Fasilitas tidak tersedia')
-    }
-
-    // 2. Insert ke tabel peminjaman
+    // === Insert data ke tabel peminjaman ===
     const { error: errInsert } = await supabase.from('peminjaman').insert([
       {
-        id_user, // disesuaikan
+        id_user: nis,
         kode_inventaris,
-        tanggal_pengajuan,
-        waktu_pengembalian,
+        tanggal_pengajuan: new Date().toISOString().split('T')[0], // tanggal hari ini
+        waktu_mulai: tanggal_pinjam,
+        waktu_selesai,
         keperluan,
-        status: 'Menunggu Persetujuan'
-      }
+        status: status || 'Dipinjam',
+        nama_peminjam: userData.nama,
+        nama_barang: fasilitas.nama_fasilitas,
+      },
     ])
 
     if (errInsert) {
       console.error('Error insert:', errInsert)
-      throw new Error('Gagal menambah data peminjaman')
+      throw new Error('Gagal menambah data peminjaman.')
     }
 
-    // 3. Kurangi stok fasilitas
+    // === Kurangi stok fasilitas ===
     const { error: errUpdate } = await supabase
       .from('fasilitas')
       .update({ jumlah_tersedia: fasilitas.jumlah_tersedia - 1 })
       .eq('kode_inventaris', kode_inventaris)
 
     if (errUpdate) {
-      console.error('Error update:', errUpdate)
-      throw new Error('Gagal memperbarui stok fasilitas')
+      console.error('Error update stok:', errUpdate)
+      throw new Error('Gagal memperbarui stok fasilitas.')
     }
 
-    return NextResponse.json({ message: 'Peminjaman berhasil diajukan' })
+    return NextResponse.json({ message: 'Peminjaman berhasil diajukan.' })
   } catch (error: any) {
     console.error('Error:', error.message)
     return NextResponse.json({ error: error.message }, { status: 400 })

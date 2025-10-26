@@ -1,23 +1,21 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { Resend } from "resend"
+import nodemailer from "nodemailer"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
-
 export async function POST(req: Request) {
   try {
     const formData = await req.formData()
-    const id_siswa = formData.get("id_siswa") as string
-    const gedung = formData.get("gedung") as string
-    const ruangan = formData.get("ruangan") as string
-    const nama_barang = formData.get("nama_barang") as string
-    const deskripsi = formData.get("deskripsi") as string
-    const foto = formData.get("foto") as File | null
+    const id_siswa = formData.get("id_siswa")
+    const gedung = formData.get("gedung")
+    const ruangan = formData.get("ruangan")
+    const nama_barang = formData.get("nama_barang")
+    const deskripsi = formData.get("deskripsi")
+    const foto = formData.get("foto")
 
     if (!id_siswa || !gedung || !ruangan || !deskripsi) {
       return NextResponse.json({ message: "Data wajib diisi" }, { status: 400 })
@@ -67,7 +65,18 @@ export async function POST(req: Request) {
 
     if (insertError) throw insertError
 
-    // === Tampilan email yang konsisten dengan versi update ===
+    // === Setup SMTP (ganti kredensial di .env.local) ===
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT),
+      secure: process.env.SMTP_SECURE === "true",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    })
+
+    // === Template email ===
     const emailContent = `
       <div style="font-family: Arial, sans-serif; background-color:#f4f6f8; padding:24px;">
         <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:12px; padding:32px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
@@ -103,8 +112,9 @@ export async function POST(req: Request) {
       </div>
     `
 
-    await resend.emails.send({
-      from: "Pelaporan Kerusakan <onboarding@resend.dev>",
+    // === Kirim email ===
+    await transporter.sendMail({
+      from: `"Pelaporan Kerusakan" <${process.env.SMTP_USER}>`,
       to: userData.email,
       subject: "Laporan Kamu Berhasil Dikirim",
       html: emailContent,

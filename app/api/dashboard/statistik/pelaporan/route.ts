@@ -14,7 +14,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Parameter bulan wajib diisi' }, { status: 400 })
   }
 
-  // Hitung rentang tanggal bulan tsb
   const [tahun, bulanNum] = bulan.split('-').map(Number)
   const awalBulan = new Date(tahun, bulanNum - 1, 1).toISOString().split('T')[0]
   const akhirBulan = new Date(tahun, bulanNum, 0).toISOString().split('T')[0]
