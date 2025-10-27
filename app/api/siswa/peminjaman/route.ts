@@ -6,81 +6,79 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+// [POST] Ajukan Peminjaman
 export async function POST(req: Request) {
   try {
     const body = await req.json()
     const {
-      nis,
+      id_user,
       kode_inventaris,
-      tanggal_pinjam,
+      waktu_mulai,
       waktu_selesai,
       keperluan,
       status,
+      nama_peminjam,
+      nama_barang,
     } = body
 
-    console.log('Data diterima:', body)
-
-    if (!nis || !kode_inventaris || !tanggal_pinjam || !waktu_selesai || !keperluan) {
-      return NextResponse.json({ error: 'Semua field wajib diisi.' }, { status: 400 })
+    // Validasi input
+    if (!id_user || !kode_inventaris || !waktu_mulai || !waktu_selesai) {
+      return NextResponse.json(
+        { error: 'Semua field wajib diisi.' },
+        { status: 400 }
+      )
     }
 
-    // === Ambil data user dari tabel users ===
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('nama, email, nis')
-      .eq('nis', nis)
-      .single()
-
-    if (userError || !userData) {
-      console.error('User tidak ditemukan:', userError)
-      return NextResponse.json({ error: 'User tidak ditemukan di database.' }, { status: 404 })
-    }
-
-    // === Ambil data fasilitas untuk nama_barang & stok ===
-    const { data: fasilitas, error: errFasilitas } = await supabase
-      .from('fasilitas')
-      .select('nama_fasilitas, jumlah_tersedia')
-      .eq('kode_inventaris', kode_inventaris)
-      .single()
-
-    if (errFasilitas) throw new Error('Gagal mengambil data fasilitas.')
-    if (!fasilitas || fasilitas.jumlah_tersedia <= 0)
-      throw new Error('Fasilitas tidak tersedia.')
-
-    // === Insert data ke tabel peminjaman ===
-    const { error: errInsert } = await supabase.from('peminjaman').insert([
+    // Insert data ke tabel peminjaman
+    const { data, error } = await supabase.from('peminjaman').insert([
       {
-        id_user: nis,
+        id_user,
         kode_inventaris,
-        tanggal_pengajuan: new Date().toISOString().split('T')[0], // tanggal hari ini
-        waktu_mulai: tanggal_pinjam,
+        tanggal_pengajuan: new Date().toISOString().split('T')[0],
+        waktu_mulai,
         waktu_selesai,
         keperluan,
         status: status || 'Dipinjam',
-        nama_peminjam: userData.nama,
-        nama_barang: fasilitas.nama_fasilitas,
+        nama_peminjam: nama_peminjam || null,
+        nama_barang: nama_barang || null,
       },
     ])
 
-    if (errInsert) {
-      console.error('Error insert:', errInsert)
-      throw new Error('Gagal menambah data peminjaman.')
-    }
+    if (error) throw error
 
-    // === Kurangi stok fasilitas ===
-    const { error: errUpdate } = await supabase
-      .from('fasilitas')
-      .update({ jumlah_tersedia: fasilitas.jumlah_tersedia - 1 })
-      .eq('kode_inventaris', kode_inventaris)
+    return NextResponse.json({ message: 'Peminjaman berhasil diajukan.', data })
+  } catch (err) {
+    console.error('Error ajukan peminjaman:', err)
+    return NextResponse.json(
+      { error: 'Gagal mengajukan peminjaman.' },
+      { status: 500 }
+    )
+  }
+}
 
-    if (errUpdate) {
-      console.error('Error update stok:', errUpdate)
-      throw new Error('Gagal memperbarui stok fasilitas.')
-    }
+// [GET] Ambil Daftar Peminjaman Berdasarkan NIS / ID User
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const nis = searchParams.get('nis')
 
-    return NextResponse.json({ message: 'Peminjaman berhasil diajukan.' })
-  } catch (error: any) {
-    console.error('Error:', error.message)
-    return NextResponse.json({ error: error.message }, { status: 400 })
+  if (!nis) {
+    return NextResponse.json({ error: 'NIS wajib dikirim.' }, { status: 400 })
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('peminjaman')
+      .select('*')
+      .or(`id_user.eq.${nis},nis.eq.${nis}`)
+
+    if (error) throw error
+
+    return NextResponse.json(data)
+  } catch (err) {
+    console.error('Error ambil data peminjaman:', err)
+    return NextResponse.json(
+      { error: 'Gagal mengambil data peminjaman.' },
+      { status: 500 }
+    )
   }
 }
