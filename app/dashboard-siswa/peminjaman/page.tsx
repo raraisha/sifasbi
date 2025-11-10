@@ -16,7 +16,7 @@ export default function PengajuanPeminjamanPage() {
 
   // Ambil data user & fasilitas
   useEffect(() => {
-    const storedUser = localStorage.getItem('users')
+    const storedUser = localStorage.getItem('user') || localStorage.getItem('users')
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser)
       if (parsedUser?.nis) setUser(parsedUser)

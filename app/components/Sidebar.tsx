@@ -11,7 +11,7 @@ const menu = [
   { label: 'Laporan Kerusakan', icon: <FiTool />, href: '/ADMIN/laporan-kerusakan' },
   { label: 'Peminjaman', icon: <FiBook />, href: '/ADMIN/peminjaman' },
   { label: 'Kelola Inventaris', icon: <FiArchive />, href: '/ADMIN/kelola-inventaris' },
-  { label: 'Histori Data', icon: <FiBook />, href: '/ADMIN/log-aktivitas' },
+  // { label: 'Histori Data', icon: <FiBook />, href: '/ADMIN/log-aktivitas' },
   { label: 'Laporan & Statistik', icon: <FiBarChart2 />, href: '/ADMIN/statistik' },
 ]
 

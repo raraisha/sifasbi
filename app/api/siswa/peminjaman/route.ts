@@ -6,10 +6,37 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-// [POST] Ajukan Peminjaman
+// ===== [POST] Ajukan Peminjaman =====
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
+    // Cek dulu content-type
+    const contentType = req.headers.get('content-type') || ''
+    if (!contentType.includes('application/json')) {
+      return NextResponse.json(
+        { error: 'Content-Type harus application/json' },
+        { status: 400 }
+      )
+    }
+
+    // Ambil body JSON
+    const bodyText = await req.text()
+    if (!bodyText) {
+      return NextResponse.json(
+        { error: 'Body JSON kosong' },
+        { status: 400 }
+      )
+    }
+
+    let body: any
+    try {
+      body = JSON.parse(bodyText)
+    } catch (err) {
+      return NextResponse.json(
+        { error: 'Body JSON tidak valid' },
+        { status: 400 }
+      )
+    }
+
     const {
       id_user,
       kode_inventaris,
@@ -21,15 +48,15 @@ export async function POST(req: Request) {
       nama_barang,
     } = body
 
-    // Validasi input
+    // Validasi input wajib
     if (!id_user || !kode_inventaris || !waktu_mulai || !waktu_selesai) {
       return NextResponse.json(
-        { error: 'Semua field wajib diisi.' },
+        { error: 'Field id_user, kode_inventaris, waktu_mulai, dan waktu_selesai wajib diisi.' },
         { status: 400 }
       )
     }
 
-    // Insert data ke tabel peminjaman
+    // Insert ke tabel peminjaman
     const { data, error } = await supabase.from('peminjaman').insert([
       {
         id_user,
@@ -37,8 +64,8 @@ export async function POST(req: Request) {
         tanggal_pengajuan: new Date().toISOString().split('T')[0],
         waktu_mulai,
         waktu_selesai,
-        keperluan,
-        status: status || 'Dipinjam',
+        keperluan: keperluan || null,
+        status: status || 'Menunggu',
         nama_peminjam: nama_peminjam || null,
         nama_barang: nama_barang || null,
       },
@@ -46,8 +73,11 @@ export async function POST(req: Request) {
 
     if (error) throw error
 
-    return NextResponse.json({ message: 'Peminjaman berhasil diajukan.', data })
-  } catch (err) {
+    return NextResponse.json({
+      message: 'Peminjaman berhasil diajukan.',
+      data,
+    })
+  } catch (err: any) {
     console.error('Error ajukan peminjaman:', err)
     return NextResponse.json(
       { error: 'Gagal mengajukan peminjaman.' },
@@ -56,7 +86,7 @@ export async function POST(req: Request) {
   }
 }
 
-// [GET] Ambil Daftar Peminjaman Berdasarkan NIS / ID User
+// ===== [GET] Ambil Daftar Peminjaman Berdasarkan NIS / ID User =====
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const nis = searchParams.get('nis')

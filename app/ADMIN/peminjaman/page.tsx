@@ -3,12 +3,16 @@
 import Sidebar from '../../components/Sidebar'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast, Toaster } from 'react-hot-toast'
 
 export default function KelolaPeminjamanPage() {
   const router = useRouter()
   const [dataPeminjaman, setDataPeminjaman] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('')
+  const [selectedPeminjaman, setSelectedPeminjaman] = useState<any | null>(null)
+  const [editStatus, setEditStatus] = useState<string | null>(null)
+  const [updating, setUpdating] = useState(false)
 
   const fetchData = async () => {
     try {
@@ -22,26 +26,59 @@ export default function KelolaPeminjamanPage() {
     }
   }
 
-  const updateStatus = async (id: number, newStatus: string) => {
+  useEffect(() => { fetchData() }, [])
+
+  useEffect(() => {
+    if (selectedPeminjaman) setEditStatus(selectedPeminjaman.status)
+  }, [selectedPeminjaman])
+
+  const handleStatusChange = async (peminjaman: any, newStatus: string) => {
+    setEditStatus(newStatus)
+    setUpdating(true)
     try {
       const res = await fetch('/api/peminjaman', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: newStatus })
+        body: JSON.stringify({ id: peminjaman.id_peminjaman, status: newStatus })
       })
       if (!res.ok) throw new Error('Gagal update status')
-      setDataPeminjaman(prev => prev.map(item =>
-        item.id_peminjaman === id ? { ...item, status: newStatus } : item
-      ))
+
+      // Update state
+      setDataPeminjaman(prev =>
+        prev.map(item =>
+          item.id_peminjaman === peminjaman.id_peminjaman
+            ? { ...item, status: newStatus }
+            : item
+        )
+      )
+      setSelectedPeminjaman(prev => prev && { ...prev, status: newStatus })
+      toast.success('Status berhasil diperbarui!')
+
+      // Kirim email notifikasi
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: peminjaman.email || 'example@email.com',
+            subject: `Status Peminjaman: ${newStatus}`,
+            message: `Halo ${peminjaman.nama_peminjam}, status peminjaman fasilitas "${peminjaman.nama_barang}" sudah diubah menjadi ${newStatus}.`
+          })
+        })
+        toast.success('Email notifikasi berhasil dikirim!')
+      } catch (err) {
+        console.error(err)
+        toast.error('Gagal mengirim email notifikasi.')
+      }
+
     } catch (err) {
       console.error(err)
-      alert('Update status gagal.')
+      toast.error('Gagal update status, coba lagi.')
+      setEditStatus(peminjaman.status)
+    } finally {
+      setUpdating(false)
     }
   }
-
-  useEffect(() => {
-    fetchData()
-  }, [])
 
   const filteredData = dataPeminjaman
     .filter(item =>
@@ -49,38 +86,31 @@ export default function KelolaPeminjamanPage() {
     )
     .filter(item => (filter ? item.status === filter : true))
 
+  const tanggalSekarang = new Date().toLocaleDateString('id-ID', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F9F8FD] text-black">
+      <Toaster position="top-right" />
       <div className="flex flex-1 flex-col lg:flex-row">
-        {/* Sidebar collapse di mobile */}
         <Sidebar />
         <main className="flex-1 p-6">
-          {/* Navbar Atas */}
           <div className="bg-white shadow px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
             <h1 className="text-lg font-semibold">Kelola Peminjaman Fasilitas</h1>
-            <span className="text-sm text-gray-500">
-              {new Date().toLocaleDateString('id-ID', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-            </span>
+            <span className="text-sm text-gray-500">{tanggalSekarang}</span>
           </div>
 
-          {/* Search & Filter */}
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <input
               type="text"
               placeholder="Search nama peminjam..."
               className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 text-black"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={search} onChange={e => setSearch(e.target.value)}
             />
             <select
               className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 text-black"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              value={filter} onChange={e => setFilter(e.target.value)}
             >
               <option value="">Semua</option>
               <option value="Menunggu">Menunggu</option>
@@ -90,7 +120,6 @@ export default function KelolaPeminjamanPage() {
             </select>
           </div>
 
-          {/* Table */}
           <div className="bg-white p-4 rounded-lg shadow overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse text-black">
               <thead>
@@ -105,7 +134,7 @@ export default function KelolaPeminjamanPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredData.map((row) => (
+                {filteredData.map(row => (
                   <tr key={row.id_peminjaman} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-2">{row.id_peminjaman}</td>
                     <td className="px-4 py-2">{row.nama_peminjam}</td>
@@ -117,41 +146,89 @@ export default function KelolaPeminjamanPage() {
                       {row.status === 'Menunggu' && (
                         <>
                           <button
-                            onClick={() => updateStatus(row.id_peminjaman, 'Disetujui')}
+                            onClick={() => handleStatusChange(row, 'Disetujui')}
                             className="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
-                          >
-                            Terima
-                          </button>
+                          >Terima</button>
                           <button
-                            onClick={() => updateStatus(row.id_peminjaman, 'Ditolak')}
+                            onClick={() => handleStatusChange(row, 'Ditolak')}
                             className="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
-                          >
-                            Tolak
-                          </button>
+                          >Tolak</button>
                         </>
                       )}
                       {row.status === 'Disetujui' && (
                         <button
-                          onClick={() => updateStatus(row.id_peminjaman, 'Selesai')}
+                          onClick={() => handleStatusChange(row, 'Selesai')}
                           className="bg-purple-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
-                        >
-                          Selesai
-                        </button>
+                        >Selesai</button>
                       )}
+                      <button
+                        onClick={() => setSelectedPeminjaman(row)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
+                      >Detail</button>
                     </td>
                   </tr>
                 ))}
-
                 {filteredData.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="text-center py-4 text-gray-500">
-                      Tidak ada data
-                    </td>
+                    <td colSpan={7} className="text-center py-4 text-gray-500">Tidak ada data</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Modal Detail */}
+          {selectedPeminjaman && (
+            <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/30 backdrop-blur-sm">
+              <div className="bg-white rounded-xl p-6 w-[700px] shadow-2xl relative flex gap-6">
+                <button
+                  onClick={() => setSelectedPeminjaman(null)}
+                  className="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-2xl font-bold"
+                >×</button>
+
+                <div className="flex-1 space-y-3 text-gray-800">
+                  <h2 className="text-lg font-extrabold mb-2 text-gray-900 text-center">
+                    Detail Peminjaman ID {selectedPeminjaman.id_peminjaman}
+                  </h2>
+
+                  {[
+                    { label: 'Nama Peminjam', value: selectedPeminjaman.nama_peminjam },
+                    { label: 'Fasilitas', value: selectedPeminjaman.nama_barang },
+                    { label: 'Waktu Pinjam', value: formatWaktu(selectedPeminjaman.waktu_pinjam) },
+                    { label: 'Waktu Selesai', value: formatWaktu(selectedPeminjaman.waktu_selesai) },
+                  ].map(({ label, value }) => (
+                    <div key={label}>
+                      <label className="block font-semibold mb-1">{label}</label>
+                      <input
+                        type="text" value={value || ''} readOnly
+                        className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-50 text-gray-700"
+                      />
+                    </div>
+                  ))}
+
+                  <div>
+                    <label className="block font-semibold mb-1">Status</label>
+                    <select
+                      value={editStatus || ''}
+                      onChange={e => handleStatusChange(selectedPeminjaman, e.target.value)}
+                      disabled={updating}
+                      className="w-full border rounded px-3 py-1"
+                    >
+                      <option value="Menunggu">Menunggu</option>
+                      <option value="Disetujui">Disetujui</option>
+                      <option value="Ditolak">Ditolak</option>
+                      <option value="Selesai">Selesai</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedPeminjaman(null)}
+                    className="mt-4 w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition"
+                  >Tutup</button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
@@ -160,12 +237,5 @@ export default function KelolaPeminjamanPage() {
 
 function formatWaktu(waktu: string) {
   const t = new Date(waktu)
-  return `${t.toLocaleDateString('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })} ${t.toLocaleTimeString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })} WIB`
+  return `${t.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })} ${t.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`
 }
