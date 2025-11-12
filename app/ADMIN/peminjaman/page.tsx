@@ -27,67 +27,56 @@ export default function KelolaPeminjamanPage() {
   }
 
   useEffect(() => { fetchData() }, [])
-
-  useEffect(() => {
-    if (selectedPeminjaman) setEditStatus(selectedPeminjaman.status)
-  }, [selectedPeminjaman])
+  useEffect(() => { if (selectedPeminjaman) setEditStatus(selectedPeminjaman.status) }, [selectedPeminjaman])
 
   const handleStatusChange = async (peminjaman: any, newStatus: string) => {
-    setEditStatus(newStatus)
+    if (newStatus === 'Ditolak') {
+      const alasan = prompt('Masukkan alasan penolakan:')
+      if (!alasan) {
+        toast.error('Alasan penolakan wajib diisi!')
+        return
+      }
+      return updateStatus(peminjaman, newStatus, alasan)
+    }
+
+    // kalau disetujui, langsung ubah jadi dipinjam
+    if (newStatus === 'Disetujui') newStatus = 'Dipinjam'
+
+    updateStatus(peminjaman, newStatus)
+  }
+
+  const updateStatus = async (peminjaman: any, status: string, alasan_penolakan?: string) => {
     setUpdating(true)
     try {
       const res = await fetch('/api/peminjaman', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: peminjaman.id_peminjaman, status: newStatus })
+        body: JSON.stringify({ id_peminjaman: peminjaman.id_peminjaman, status, alasan_penolakan })
       })
       if (!res.ok) throw new Error('Gagal update status')
 
-      // Update state
       setDataPeminjaman(prev =>
         prev.map(item =>
-          item.id_peminjaman === peminjaman.id_peminjaman
-            ? { ...item, status: newStatus }
-            : item
+          item.id_peminjaman === peminjaman.id_peminjaman ? { ...item, status } : item
         )
       )
-      setSelectedPeminjaman(prev => prev && { ...prev, status: newStatus })
-      toast.success('Status berhasil diperbarui!')
-
-      // Kirim email notifikasi
-      try {
-        await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: peminjaman.email || 'example@email.com',
-            subject: `Status Peminjaman: ${newStatus}`,
-            message: `Halo ${peminjaman.nama_peminjam}, status peminjaman fasilitas "${peminjaman.nama_barang}" sudah diubah menjadi ${newStatus}.`
-          })
-        })
-        toast.success('Email notifikasi berhasil dikirim!')
-      } catch (err) {
-        console.error(err)
-        toast.error('Gagal mengirim email notifikasi.')
-      }
+      setSelectedPeminjaman(prev => prev && { ...prev, status })
+      toast.success(`Status berhasil diubah menjadi ${status}`)
 
     } catch (err) {
       console.error(err)
-      toast.error('Gagal update status, coba lagi.')
-      setEditStatus(peminjaman.status)
+      toast.error('Gagal update status.')
     } finally {
       setUpdating(false)
     }
   }
 
   const filteredData = dataPeminjaman
-    .filter(item =>
-      item.nama_peminjam?.toLowerCase().includes(search.toLowerCase())
-    )
+    .filter(item => item.nama_peminjam?.toLowerCase().includes(search.toLowerCase()))
     .filter(item => (filter ? item.status === filter : true))
 
   const tanggalSekarang = new Date().toLocaleDateString('id-ID', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   })
 
   return (
@@ -106,15 +95,17 @@ export default function KelolaPeminjamanPage() {
               type="text"
               placeholder="Search nama peminjam..."
               className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 text-black"
-              value={search} onChange={e => setSearch(e.target.value)}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
             />
             <select
               className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 text-black"
-              value={filter} onChange={e => setFilter(e.target.value)}
+              value={filter}
+              onChange={e => setFilter(e.target.value)}
             >
               <option value="">Semua</option>
               <option value="Menunggu">Menunggu</option>
-              <option value="Disetujui">Disetujui</option>
+              <option value="Dipinjam">Dipinjam</option>
               <option value="Ditolak">Ditolak</option>
               <option value="Selesai">Selesai</option>
             </select>
@@ -155,7 +146,7 @@ export default function KelolaPeminjamanPage() {
                           >Tolak</button>
                         </>
                       )}
-                      {row.status === 'Disetujui' && (
+                      {row.status === 'Dipinjam' && (
                         <button
                           onClick={() => handleStatusChange(row, 'Selesai')}
                           className="bg-purple-500 text-white px-3 py-1 rounded-md text-sm hover:brightness-110"
@@ -169,15 +160,12 @@ export default function KelolaPeminjamanPage() {
                   </tr>
                 ))}
                 {filteredData.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="text-center py-4 text-gray-500">Tidak ada data</td>
-                  </tr>
+                  <tr><td colSpan={7} className="text-center py-4 text-gray-500">Tidak ada data</td></tr>
                 )}
               </tbody>
             </table>
           </div>
 
-          {/* Modal Detail */}
           {selectedPeminjaman && (
             <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/30 backdrop-blur-sm">
               <div className="bg-white rounded-xl p-6 w-[700px] shadow-2xl relative flex gap-6">
@@ -194,6 +182,7 @@ export default function KelolaPeminjamanPage() {
                   {[
                     { label: 'Nama Peminjam', value: selectedPeminjaman.nama_peminjam },
                     { label: 'Fasilitas', value: selectedPeminjaman.nama_barang },
+                    { label: 'Keperluan', value: selectedPeminjaman.keperluan },
                     { label: 'Waktu Pinjam', value: formatWaktu(selectedPeminjaman.waktu_pinjam) },
                     { label: 'Waktu Selesai', value: formatWaktu(selectedPeminjaman.waktu_selesai) },
                   ].map(({ label, value }) => (
@@ -215,7 +204,7 @@ export default function KelolaPeminjamanPage() {
                       className="w-full border rounded px-3 py-1"
                     >
                       <option value="Menunggu">Menunggu</option>
-                      <option value="Disetujui">Disetujui</option>
+                      <option value="Dipinjam">Dipinjam</option>
                       <option value="Ditolak">Ditolak</option>
                       <option value="Selesai">Selesai</option>
                     </select>
@@ -236,6 +225,8 @@ export default function KelolaPeminjamanPage() {
 }
 
 function formatWaktu(waktu: string) {
+  if (!waktu) return '-'
   const t = new Date(waktu)
-  return `${t.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })} ${t.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`
+  if (isNaN(t.getTime())) return '-'
+  return `${t.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} ${t.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`
 }

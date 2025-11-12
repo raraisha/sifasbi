@@ -11,7 +11,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('peminjaman')
       .select('*')
-      .order('tanggal_pengajuan', { ascending: false })
+      .filter('tanggal_pengajuan', 'not.is', null)
 
     if (error) throw error
 
