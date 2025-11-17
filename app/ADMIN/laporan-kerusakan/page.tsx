@@ -162,6 +162,8 @@ export default function LaporanKerusakanPage() {
                   <th className="px-4 py-2">ID</th>
                   <th className="px-4 py-2">NIS</th>
                   <th className="px-4 py-2">Nama Siswa</th>
+                  <th className="px-4 py-2">Kelas</th>
+                  <th className="px-4 py-2">Jurusan</th>
                   <th className="px-4 py-2">Nama Barang</th>
                   <th className="px-4 py-2">Waktu Lapor</th>
                   <th className="px-4 py-2">Ruangan</th>
@@ -175,6 +177,8 @@ export default function LaporanKerusakanPage() {
                     <td className="px-4 py-2">{row.id_pelaporan}</td>
                     <td className="px-4 py-2">{row.id_siswa}</td>
                     <td className="px-4 py-2">{row.nama_siswa}</td>
+                    <td className="px-4 py-2">{row.kelas}</td>
+                    <td className="px-4 py-2">{row.jurusan}</td>
                     <td className="px-4 py-2">{row.nama_barang}</td>
                     <td className="px-4 py-2">{formatWaktu(row.waktu_dibuat)}</td>
                     <td className="px-4 py-2">{row.ruangan}</td>

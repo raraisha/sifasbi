@@ -116,7 +116,9 @@ export default function KelolaPeminjamanPage() {
               <thead>
                 <tr className="border-b">
                   <th className="px-4 py-2">ID</th>
-                  <th className="px-4 py-2">Peminjam</th>
+                  <th className="px-4 py-2">Nama Peminjam</th>
+                  <th className="px-4 py-2">Kelas</th>
+                  <th className="px-4 py-2">Jurusan</th>
                   <th className="px-4 py-2">Fasilitas</th>
                   <th className="px-4 py-2">Waktu Pinjam</th>
                   <th className="px-4 py-2">Waktu Selesai</th>
@@ -129,6 +131,8 @@ export default function KelolaPeminjamanPage() {
                   <tr key={row.id_peminjaman} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-2">{row.id_peminjaman}</td>
                     <td className="px-4 py-2">{row.nama_peminjam}</td>
+                    <td className="px-4 py-2">{row.kelas}</td>
+                    <td className="px-4 py-2">{row.jurusan}</td>
                     <td className="px-4 py-2">{row.nama_barang}</td>
                     <td className="px-4 py-2">{formatWaktu(row.waktu_pinjam)}</td>
                     <td className="px-4 py-2">{formatWaktu(row.waktu_selesai)}</td>
@@ -181,6 +185,8 @@ export default function KelolaPeminjamanPage() {
 
                   {[
                     { label: 'Nama Peminjam', value: selectedPeminjaman.nama_peminjam },
+                    { label: 'Kelas', value: selectedPeminjaman.kelas },
+                    { label: 'Jurusan', value: selectedPeminjaman.jurusan },
                     { label: 'Fasilitas', value: selectedPeminjaman.nama_barang },
                     { label: 'Keperluan', value: selectedPeminjaman.keperluan },
                     { label: 'Waktu Pinjam', value: formatWaktu(selectedPeminjaman.waktu_pinjam) },
