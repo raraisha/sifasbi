@@ -14,24 +14,34 @@ export async function GET(req: Request) {
     return NextResponse.json({ message: "ID siswa tidak ditemukan" }, { status: 400 })
   }
 
-  try { 
-const { data: peminjaman, error: errorPeminjaman } = await supabase
-  .from("peminjaman")
-  .select("*")
-  .eq("id_siswa", id_siswa)
-  .order("tanggal_pengajuan", { ascending: false })
+  try {
+    const [peminjamanRes, kerusakanRes] = await Promise.all([
+      supabase
+        .from("peminjaman")
+        .select("*")
+        .eq("id_user", id_siswa)
+        .order("tanggal_pengajuan", { ascending: false }),
+      supabase
+        .from("pelaporan_kerusakan")
+        .select("*")
+        .eq("id_siswa", id_siswa)
+        .order("waktu_dibuat", { ascending: false })
+    ])
 
-const { data: kerusakan, error: errorKerusakan } = await supabase
-  .from("pelaporan_kerusakan")
-  .select("*")
-  .eq("id_siswa", id_siswa)
-  .order("waktu_dibuat", { ascending: false })
+    if (peminjamanRes.error) {
+      console.error("Error peminjaman:", peminjamanRes.error)
+      return NextResponse.json({ message: "Gagal ambil data peminjaman" }, { status: 500 })
+    }
 
-console.log("peminjaman:", peminjaman, "error:", errorPeminjaman)
-console.log("kerusakan:", kerusakan, "error:", errorKerusakan)
+    if (kerusakanRes.error) {
+      console.error("Error kerusakan:", kerusakanRes.error)
+      return NextResponse.json({ message: "Gagal ambil data kerusakan" }, { status: 500 })
+    }
 
-
-    return NextResponse.json({ peminjaman, kerusakan })
+    return NextResponse.json({
+      peminjaman: peminjamanRes.data || [],
+      kerusakan: kerusakanRes.data || []
+    })
   } catch (err) {
     console.error(err)
     return NextResponse.json({ message: "Gagal ambil data history" }, { status: 500 })
