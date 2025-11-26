@@ -59,16 +59,16 @@ export default function HistoryPage() {
     return <Clock4 className="w-5 h-5 text-amber-600" />
   }
 
-  const getStatusBgColor = (status: string) => {
-    if (status === 'disetujui' || status === 'selesai') return 'bg-green-50'
-    if (status === 'ditolak') return 'bg-red-50'
-    return 'bg-amber-50'
+  const getStatusBadgeColor = (status: string) => {
+    if (status === 'disetujui' || status === 'selesai') return 'bg-green-100 text-green-800 border border-green-300'
+    if (status === 'ditolak') return 'bg-red-100 text-red-800 border border-red-300'
+    return 'bg-amber-100 text-amber-800 border border-amber-300'
   }
 
-  const getStatusBadgeColor = (status: string) => {
-    if (status === 'disetujui' || status === 'selesai') return 'bg-green-100 text-green-800'
-    if (status === 'ditolak') return 'bg-red-100 text-red-800'
-    return 'bg-amber-100 text-amber-800'
+  const getCardStyle = (status: string) => {
+    if (status === 'disetujui' || status === 'selesai') return 'border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white'
+    if (status === 'ditolak') return 'border-l-4 border-l-red-500 bg-gradient-to-r from-red-50 to-white'
+    return 'border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-50 to-white'
   }
 
   useEffect(() => {
@@ -106,43 +106,50 @@ export default function HistoryPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 px-4">
       <Toaster position="top-center" />
       
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Riwayat Aktivitas</h1>
-          <p className="text-gray-500">Kelola riwayat peminjaman dan laporan kerusakan Anda</p>
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
+            <span className="text-3xl">📋</span>
+          </div>
+          <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Riwayat Aktivitas</h1>
+          <p className="text-gray-600">Kelola riwayat peminjaman dan laporan kerusakan Anda</p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 border-b border-gray-200">
+        <div className="bg-white rounded-2xl shadow-md p-2 mb-8 border border-gray-100 flex gap-2">
           <button
             onClick={() => setActiveTab('peminjaman')}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold border-b-2 transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl transition-all ${
               activeTab === 'peminjaman'
-                ? 'text-blue-600 border-blue-600'
-                : 'text-gray-600 border-transparent hover:text-gray-900'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                : 'text-gray-600 hover:bg-gray-50'
             }`}
           >
             <ClipboardList size={20} />
-            Peminjaman
-            <span className="ml-2 bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full text-sm font-medium">
+            <span className="hidden sm:inline">Peminjaman</span>
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+              activeTab === 'peminjaman' ? 'bg-white/30 text-white' : 'bg-blue-100 text-blue-700'
+            }`}>
               {peminjaman.length}
             </span>
           </button>
           <button
             onClick={() => setActiveTab('laporan')}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold border-b-2 transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl transition-all ${
               activeTab === 'laporan'
-                ? 'text-purple-600 border-purple-600'
-                : 'text-gray-600 border-transparent hover:text-gray-900'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                : 'text-gray-600 hover:bg-gray-50'
             }`}
           >
             <Wrench size={20} />
-            Laporan Kerusakan
-            <span className="ml-2 bg-purple-100 text-purple-700 px-2.5 py-0.5 rounded-full text-sm font-medium">
+            <span className="hidden sm:inline">Laporan Kerusakan</span>
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+              activeTab === 'laporan' ? 'bg-white/30 text-white' : 'bg-purple-100 text-purple-700'
+            }`}>
               {laporan.length}
             </span>
           </button>
@@ -150,11 +157,11 @@ export default function HistoryPage() {
 
         {/* Content */}
         {loading ? (
-          <div className="text-center py-16">
+          <div className="text-center py-16 bg-white rounded-2xl shadow-md">
             <div className="inline-block">
-              <div className="animate-spin rounded-full h-10 w-10 border-2 border-indigo-600 border-t-transparent mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600 mb-4"></div>
             </div>
-            <p className="text-gray-500">Memuat data...</p>
+            <p className="text-gray-600 font-medium">Memuat data...</p>
           </div>
         ) : (
           <div>
@@ -162,47 +169,43 @@ export default function HistoryPage() {
               <div>
                 {peminjaman.length > 0 ? (
                   <div className="space-y-4">
-                    {peminjaman.map((p) => {
-                      const borderColors = {
-                        'disetujui': 'border-green-300 bg-green-50',
-                        'ditolak': 'border-red-300 bg-red-50',
-                        'pending': 'border-blue-300 bg-blue-50'
-                      }
-                      const borderColor = borderColors[p.status as keyof typeof borderColors] || 'border-blue-300 bg-blue-50'
-                      
-                      return (
+                    {peminjaman.map((p) => (
                       <div
                         key={p.id}
-                        className={`${borderColor} border-2 rounded-xl p-5 hover:shadow-md transition-all`}
+                        className={`${getCardStyle(p.status)} rounded-2xl p-6 hover:shadow-xl transition-all duration-300 border border-gray-100`}
                       >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-start gap-3 flex-1">
-                            <div className="mt-1">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-start gap-4 flex-1">
+                            <div className="bg-white rounded-xl p-3 shadow-sm">
                               {getStatusIcon(p.status)}
                             </div>
                             <div className="flex-1">
-                              <h3 className="font-semibold text-gray-900 text-lg">{p.nama_barang}</h3>
-                              <p className="text-sm text-gray-600 mt-1">Keperluan: {p.keperluan || '-'}</p>
+                              <h3 className="font-bold text-gray-900 text-lg mb-1">{p.nama_barang}</h3>
+                              <p className="text-sm text-gray-600">
+                                <span className="font-medium">Keperluan:</span> {p.keperluan || '-'}
+                              </p>
                             </div>
                           </div>
-                          <span className={`${getStatusBadgeColor(p.status)} text-xs font-semibold px-3 py-1 rounded-full ml-3 whitespace-nowrap`}>
-                            {p.status}
+                          <span className={`${getStatusBadgeColor(p.status)} text-xs font-bold px-3 py-1.5 rounded-full ml-3 whitespace-nowrap`}>
+                            {p.status.toUpperCase()}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 ml-8">
+                        <div className="flex items-center gap-3 text-sm text-gray-600 bg-white/50 rounded-xl p-3 ml-16">
                           <Clock size={16} className="text-gray-400" />
-                          <span>{formatTanggal(p.tanggal_pinjam)}</span>
+                          <span className="font-medium">{formatTanggal(p.tanggal_pinjam)}</span>
                           <span className="text-gray-400">→</span>
-                          <span>{formatTanggal(p.tanggal_kembali)}</span>
+                          <span className="font-medium">{formatTanggal(p.tanggal_kembali)}</span>
                         </div>
                       </div>
-                    )})}
+                    ))}
                   </div>
                 ) : (
-                  <div className="text-center py-16">
-                    <ClipboardList size={48} className="mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500 text-lg">Belum ada riwayat peminjaman</p>
-                    <p className="text-gray-400 text-sm mt-1">Mulai ajukan peminjaman fasilitas sekarang</p>
+                  <div className="text-center py-20 bg-white rounded-2xl shadow-md">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
+                      <ClipboardList size={40} className="text-indigo-600" />
+                    </div>
+                    <p className="text-gray-700 text-lg font-semibold mb-2">Belum ada riwayat peminjaman</p>
+                    <p className="text-gray-500 text-sm">Mulai ajukan peminjaman fasilitas sekarang</p>
                   </div>
                 )}
               </div>
@@ -210,45 +213,42 @@ export default function HistoryPage() {
               <div>
                 {laporan.length > 0 ? (
                   <div className="space-y-4">
-                    {laporan.map((l) => {
-                      const borderColors = {
-                        'selesai': 'border-green-300 bg-green-50',
-                        'pending': 'border-purple-300 bg-purple-50'
-                      }
-                      const borderColor = borderColors[l.status as keyof typeof borderColors] || 'border-purple-300 bg-purple-50'
-                      
-                      return (
+                    {laporan.map((l) => (
                       <div
                         key={l.id}
-                        className={`${borderColor} border-2 rounded-xl p-5 hover:shadow-md transition-all`}
+                        className={`${getCardStyle(l.status || 'pending')} rounded-2xl p-6 hover:shadow-xl transition-all duration-300 border border-gray-100`}
                       >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-start gap-3 flex-1">
-                            <div className="mt-1">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-start gap-4 flex-1">
+                            <div className="bg-white rounded-xl p-3 shadow-sm">
                               {getStatusIcon(l.status || 'pending')}
                             </div>
                             <div className="flex-1">
-                              <h3 className="font-semibold text-gray-900 text-lg">{l.nama_barang}</h3>
-                              <p className="text-sm text-gray-600 mt-1">{l.gedung} • {l.ruangan}</p>
-                              <p className="text-sm text-gray-700 mt-2">{l.deskripsi}</p>
+                              <h3 className="font-bold text-gray-900 text-lg mb-1">{l.nama_barang}</h3>
+                              <p className="text-sm text-gray-600 mb-2">
+                                <span className="font-medium">Lokasi:</span> {l.gedung} • {l.ruangan}
+                              </p>
+                              <p className="text-sm text-gray-700 bg-white/50 rounded-lg p-3">{l.deskripsi}</p>
                             </div>
                           </div>
-                          <span className={`${getStatusBadgeColor(l.status || 'pending')} text-xs font-semibold px-3 py-1 rounded-full ml-3 whitespace-nowrap`}>
-                            {l.status || 'pending'}
+                          <span className={`${getStatusBadgeColor(l.status || 'pending')} text-xs font-bold px-3 py-1.5 rounded-full ml-3 whitespace-nowrap`}>
+                            {(l.status || 'pending').toUpperCase()}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 ml-8">
+                        <div className="flex items-center gap-3 text-sm text-gray-600 bg-white/50 rounded-xl p-3 ml-16">
                           <Clock size={16} className="text-gray-400" />
-                          <span>{formatTanggal(l.waktu_dibuat)}</span>
+                          <span className="font-medium">{formatTanggal(l.waktu_dibuat)}</span>
                         </div>
                       </div>
-                    )})}
+                    ))}
                   </div>
                 ) : (
-                  <div className="text-center py-16">
-                    <Wrench size={48} className="mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500 text-lg">Belum ada laporan kerusakan</p>
-                    <p className="text-gray-400 text-sm mt-1">Semoga fasilitas selalu dalam kondisi baik</p>
+                  <div className="text-center py-20 bg-white rounded-2xl shadow-md">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl mb-4">
+                      <Wrench size={40} className="text-purple-600" />
+                    </div>
+                    <p className="text-gray-700 text-lg font-semibold mb-2">Belum ada laporan kerusakan</p>
+                    <p className="text-gray-500 text-sm">Semoga fasilitas selalu dalam kondisi baik</p>
                   </div>
                 )}
               </div>

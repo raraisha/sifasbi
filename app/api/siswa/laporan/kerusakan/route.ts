@@ -7,6 +7,308 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+// ===== [FUNCTION] Generate Email Template yang Bagus =====
+function generateEmailTemplate(userData: {
+  nama: string
+}, laporan: {
+  gedung: string
+  ruangan: string
+  nama_barang: string
+  deskripsi: string
+  url_gambar: string | null
+}) {
+  return `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan Kerusakan Diterima - SiFasBi</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: #0f172a;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+    }
+    .header {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      padding: 50px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      left: -5%;
+      width: 250px;
+      height: 250px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+    }
+    .header-content {
+      position: relative;
+      z-index: 1;
+    }
+    .check-icon {
+      font-size: 50px;
+      margin-bottom: 16px;
+      animation: scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+    .header h1 {
+      color: white;
+      font-size: 28px;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 14px;
+      margin: 10px 0 0 0;
+    }
+    .body {
+      padding: 40px 30px;
+    }
+    .greeting {
+      color: #1f2937;
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 0 0 28px 0;
+    }
+    .greeting strong {
+      color: #dc2626;
+    }
+    .details-grid {
+      display: grid;
+      gap: 0;
+      background: #f8fafc;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      border: 1px solid #e2e8f0;
+    }
+    .detail-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .detail-item:last-child {
+      border-bottom: none;
+    }
+    .detail-label {
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 120px;
+    }
+    .detail-value {
+      color: #0f172a;
+      font-size: 15px;
+      font-weight: 500;
+      margin-left: auto;
+      text-align: right;
+      max-width: 300px;
+      word-wrap: break-word;
+    }
+    .image-container {
+      margin: 20px 0;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+      color: #7f1d1d;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .info-box {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      border-left: 4px solid #dc2626;
+      padding: 14px 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+      color: #7f1d1d;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .info-box strong {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .cta-container {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: white;
+      padding: 14px 36px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+    }
+    .divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 24px 0;
+    }
+    .footer-text {
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: center;
+      margin: 0;
+    }
+    .footer-text a {
+      color: #dc2626;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+    .footer {
+      background: #f8fafc;
+      padding: 20px 30px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <div class="check-icon">📋</div>
+        <h1>Laporan Kamu Diterima</h1>
+        <p>Laporan sedang kami proses oleh tim maintenance</p>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+      <p class="greeting">
+        Halo <strong>${userData.nama}</strong>, laporan kerusakan kamu sudah berhasil dikirim dan sedang menunggu konfirmasi dari tim kami.
+      </p>
+
+      <!-- Status -->
+      <div class="status-badge">
+        ⏳ Status: <strong>Menunggu Konfirmasi</strong>
+      </div>
+
+      <!-- Details -->
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="detail-label">🏢 Gedung</div>
+          <div class="detail-value">${laporan.gedung}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">🚪 Ruangan</div>
+          <div class="detail-value">${laporan.ruangan}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">📦 Barang</div>
+          <div class="detail-value">${laporan.nama_barang || '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">📝 Deskripsi</div>
+          <div class="detail-value">${laporan.deskripsi}</div>
+        </div>
+      </div>
+
+      <!-- Gambar jika ada -->
+      ${laporan.url_gambar ? `
+        <div class="image-container">
+          <img src="${laporan.url_gambar}" alt="Foto Kerusakan" style="max-width: 100%; border-radius: 8px;">
+        </div>
+      ` : ''}
+
+      <!-- Info -->
+      <div class="info-box">
+        <strong>ℹ️ Informasi Penting</strong>
+        Tim maintenance kami akan segera meninjau laporan Anda. Notifikasi akan dikirim melalui email ketika laporan telah dikonfirmasi dan perbaikan dimulai. Estimasi waktu respons: 1-2 hari kerja.
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-container">
+        <a href="https://sifasbi.vercel.app/dashboard-siswa/histori" class="cta-button">Lihat Status Laporan</a>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Contact -->
+      <p class="footer-text">
+        Ada pertanyaan? <a href="mailto:admin@example.com">Hubungi Admin</a><br>
+        atau kunjungi portal SiFasBi untuk info lebih lanjut.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      🔧 Sistem Pelaporan Kerusakan Barang Inventaris (SiFasBi)<br>
+      Email ini dikirim otomatis, mohon tidak membalas email ini.
+    </div>
+  </div>
+</body>
+</html>
+  `
+}
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData()
@@ -76,47 +378,20 @@ export async function POST(req: Request) {
       },
     })
 
-    // === Template email ===
-    const emailContent = `
-      <div style="font-family: Arial, sans-serif; background-color:#f4f6f8; padding:24px;">
-        <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:12px; padding:32px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
-          <div style="text-align:center;">
-            <h1 style="color:#2563eb; margin-bottom:8px;">Laporan Kamu Diterima ✅</h1>
-            <p style="color:#4b5563; font-size:15px;">Halo <strong>${userData.nama}</strong>, laporan kamu sudah berhasil dikirim dan sedang menunggu konfirmasi dari tim kami.</p>
-          </div>
-
-          <div style="margin-top:24px;">
-            <table style="width:100%; border-collapse:collapse; font-size:14px;">
-              <tr><td style="padding:8px 0; color:#6b7280;">Gedung</td><td><strong>${gedung}</strong></td></tr>
-              <tr><td style="padding:8px 0; color:#6b7280;">Ruangan</td><td><strong>${ruangan}</strong></td></tr>
-              <tr><td style="padding:8px 0; color:#6b7280;">Barang</td><td><strong>${nama_barang || "-"}</strong></td></tr>
-              <tr><td style="padding:8px 0; color:#6b7280;">Deskripsi</td><td>${deskripsi}</td></tr>
-              ${
-                url_gambar
-                  ? `<tr><td style="padding:8px 0; color:#6b7280;">Foto</td><td><a href="${url_gambar}" style="color:#2563eb;">Lihat Gambar</a></td></tr>`
-                  : ""
-              }
-              <tr><td style="padding:8px 0; color:#6b7280;">Status</td><td><span style="background:#fef9c3; color:#854d0e; padding:4px 10px; border-radius:6px; font-weight:600;">Menunggu Konfirmasi</span></td></tr>
-            </table>
-          </div>
-
-          <div style="margin-top:24px; text-align:center;">
-            <a href="mailto:raishaafiqaah@gmail.com" style="text-decoration:none; background:#2563eb; color:#ffffff; padding:10px 18px; border-radius:6px; font-size:14px;">Hubungi Admin</a>
-          </div>
-
-          <hr style="margin-top:32px; border:none; border-top:1px solid #e5e7eb;">
-          <p style="font-size:12px; color:#9ca3af; text-align:center;">
-            Email ini dikirim otomatis oleh sistem Pelaporan Kerusakan. Mohon tidak membalas email ini.
-          </p>
-        </div>
-      </div>
-    `
+    // === Generate Email Content ===
+    const emailContent = generateEmailTemplate(userData, {
+      gedung,
+      ruangan,
+      nama_barang: nama_barang as string,
+      deskripsi: deskripsi as string,
+      url_gambar,
+    })
 
     // === Kirim email ===
     await transporter.sendMail({
-      from: `"Pelaporan Kerusakan" <${process.env.SMTP_USER}>`,
+      from: `"SiFasBi - Pelaporan Kerusakan" <${process.env.SMTP_USER}>`,
       to: userData.email,
-      subject: "Laporan Kamu Berhasil Dikirim",
+      subject: "📋 Laporan Kerusakan Kamu Berhasil Diterima - SiFasBi",
       html: emailContent,
     })
 

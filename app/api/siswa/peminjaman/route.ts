@@ -7,6 +7,288 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+// ===== [FUNCTION] Generate Email Template yang Bagus =====
+function generateEmailTemplate(userData: {
+  nama: string
+}, peminjaman: {
+  nama_barang: string
+  kode_inventaris: string
+  waktu_mulai: string
+  waktu_selesai: string
+}) {
+  return `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konfirmasi Peminjaman - SiFasBi</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: #0f172a;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+    }
+    .header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      padding: 50px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      left: -5%;
+      width: 250px;
+      height: 250px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+    }
+    .header-content {
+      position: relative;
+      z-index: 1;
+    }
+    .check-icon {
+      font-size: 50px;
+      margin-bottom: 16px;
+      animation: scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+    .header h1 {
+      color: white;
+      font-size: 28px;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 14px;
+      margin: 10px 0 0 0;
+    }
+    .body {
+      padding: 40px 30px;
+    }
+    .greeting {
+      color: #1f2937;
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 0 0 28px 0;
+    }
+    .greeting strong {
+      color: #1e40af;
+    }
+    .details-grid {
+      display: grid;
+      gap: 0;
+      background: #f8fafc;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      border: 1px solid #e2e8f0;
+    }
+    .detail-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .detail-item:last-child {
+      border-bottom: none;
+    }
+    .detail-label {
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 120px;
+    }
+    .detail-value {
+      color: #0f172a;
+      font-size: 15px;
+      font-weight: 500;
+      margin-left: auto;
+      text-align: right;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #92400e;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .info-box {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      border-left: 4px solid #1e40af;
+      padding: 14px 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+      color: #1e40af;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .info-box strong {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .cta-container {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 14px 36px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    }
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(30, 64, 175, 0.4);
+    }
+    .divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 24px 0;
+    }
+    .footer-text {
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: center;
+      margin: 0;
+    }
+    .footer-text a {
+      color: #1e40af;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+    .footer {
+      background: #f8fafc;
+      padding: 20px 30px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <div class="check-icon">✅</div>
+        <h1>Peminjaman Berhasil Diajukan</h1>
+        <p>Ajuan Anda sedang kami proses</p>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+      <p class="greeting">
+        Halo <strong>${userData.nama}</strong>, pengajuan peminjaman kamu sudah berhasil dikirim dan kami akan segera memeriksanya.
+      </p>
+
+      <!-- Status -->
+      <div class="status-badge">
+        ⏳ Status: <strong>Menunggu Persetujuan</strong>
+      </div>
+
+      <!-- Details -->
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="detail-label">📦 Barang</div>
+          <div class="detail-value">${peminjaman.nama_barang || '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">🔖 Kode Inventaris</div>
+          <div class="detail-value" style="font-family: 'Courier New', monospace;">${peminjaman.kode_inventaris}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">📅 Waktu Mulai</div>
+          <div class="detail-value">${peminjaman.waktu_mulai}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">⏱️ Waktu Selesai</div>
+          <div class="detail-value">${peminjaman.waktu_selesai}</div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="info-box">
+        <strong>ℹ️ Informasi Penting</strong>
+        Admin akan memeriksa ajuan Anda dan mengirimkan notifikasi melalui email ketika ajuan telah disetujui atau ditolak. Proses persetujuan biasanya memakan waktu 1-2 hari kerja.
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-container">
+        <a href="https://sifasbi.vercel.app/dashboard-siswa/histori" class="cta-button">Lihat Riwayat Peminjaman</a>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Contact -->
+      <p class="footer-text">
+        Ada pertanyaan? <a href="mailto:admin@example.com">Hubungi Admin</a><br>
+        atau kunjungi portal SiFasBi untuk info lebih lanjut.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      🔒 Sistem Informasi Peminjaman Barang Inventaris (SiFasBi)<br>
+      Email ini dikirim otomatis, mohon tidak membalas email ini.
+    </div>
+  </div>
+</body>
+</html>
+  `
+}
+
 // ===== [POST] Ajukan Peminjaman =====
 export async function POST(req: Request) {
   try {
@@ -88,30 +370,17 @@ export async function POST(req: Request) {
         },
       })
 
-      const emailContent = `
-        <div style="font-family: Arial, sans-serif; background-color:#f9fafb; padding:20px;">
-          <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:8px; padding:24px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
-            <h2 style="color:#2563eb; text-align:center;">Peminjaman Berhasil Diajukan ✅</h2>
-            <p style="font-size:15px; color:#374151;">Halo <strong>${userData.nama}</strong>, pengajuan peminjaman kamu sudah berhasil dikirim.</p>
-            <table style="width:100%; font-size:14px; color:#4b5563; margin-top:16px;">
-              <tr><td style="padding:6px 0;">Barang</td><td><strong>${nama_barang || "-"}</strong></td></tr>
-              <tr><td style="padding:6px 0;">Kode Inventaris</td><td>${kode_inventaris}</td></tr>
-              <tr><td style="padding:6px 0;">Waktu Mulai</td><td>${waktu_mulai}</td></tr>
-              <tr><td style="padding:6px 0;">Waktu Selesai</td><td>${waktu_selesai}</td></tr>
-              <tr><td style="padding:6px 0;">Status</td><td><span style="background:#fef9c3; color:#854d0e; padding:3px 8px; border-radius:6px;">Menunggu</span></td></tr>
-            </table>
-            <div style="margin-top:24px; text-align:center;">
-              <a href="mailto:${process.env.SMTP_USER}" style="background:#2563eb; color:white; padding:10px 16px; border-radius:6px; text-decoration:none;">Hubungi Admin</a>
-            </div>
-            <p style="font-size:12px; color:#9ca3af; text-align:center; margin-top:20px;">Email ini dikirim otomatis oleh SiFasBi.</p>
-          </div>
-        </div>
-      `
+      const emailContent = generateEmailTemplate(userData, {
+        nama_barang: nama_barang || "-",
+        kode_inventaris,
+        waktu_mulai,
+        waktu_selesai,
+      })
 
       await transporter.sendMail({
-        from: `"Sistem Peminjaman" <${process.env.SMTP_USER}>`,
+        from: `"SiFasBi - Sistem Peminjaman" <${process.env.SMTP_USER}>`,
         to: userData.email,
-        subject: "Peminjaman Kamu Berhasil Diajukan",
+        subject: "✅ Peminjaman Anda Berhasil Diajukan - SiFasBi",
         html: emailContent,
       })
     }
