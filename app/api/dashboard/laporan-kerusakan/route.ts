@@ -34,12 +34,12 @@ export async function GET() {
 const formatted = data.map((item: any) => ({
   id_pelaporan: item.id_pelaporan,
   id_siswa: item.id_siswa,
-  nama_siswa: item.nama_siswa || 'Tidak diketahui', // langsung ambil dari kolom
-  kelas: item.kelas || 'Tidak diketahui',
-  jurusan: item.jurusan || 'Tidak diketahui',
-  nama_barang: item.nama_barang || 'Tidak diketahui',
+  nama_siswa: item.nama_siswa || ' ', // langsung ambil dari kolom
+  kelas: item.kelas || ' ',
+  jurusan: item.jurusan || ' ',
+  nama_barang: item.nama_barang || ' ',
   deskripsi: item.deskripsi || '-',
-  status: item.status || 'Belum diproses',
+  status: item.status || ' ',
   waktu_dibuat: item.waktu_dibuat,
   ruangan: item.ruangan,
   gedung: item.gedung,

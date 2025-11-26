@@ -146,12 +146,6 @@ export default function PengajuanPeminjamanPage() {
           onChange={e => setSearch(e.target.value)}
           className="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-black focus:ring-2 focus:ring-indigo-400 focus:outline-none"
         />
-        <button
-          onClick={() => setShowRequest(true)}
-          className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl px-5 py-2 text-sm font-medium shadow"
-        >
-          Request Peminjaman
-        </button>
       </div>
 
       {/* Grid Fasilitas */}
