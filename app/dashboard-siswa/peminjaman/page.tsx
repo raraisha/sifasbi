@@ -217,13 +217,7 @@ export default function PengajuanPeminjamanPage() {
 
         {/* WhatsApp Button */}
         <div className="flex justify-center">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 inline-block">
-            <p className="text-gray-600 text-sm mb-3 text-center font-medium flex items-center gap-2 justify-center">
-              <span className="text-xl">💬</span>
-              Butuh bantuan? Hubungi kami
-            </p>
-            <WhatsAppButton />
-          </div>
+<WhatsAppButton />
         </div>
       </div>
 

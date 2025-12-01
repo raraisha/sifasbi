@@ -16,6 +16,7 @@ import {
 } from 'chart.js'
 import { Pie, Bar } from 'react-chartjs-2'
 import { useRouter } from 'next/navigation'
+import { ClipboardList, Wrench, Clock, CheckCircle } from 'lucide-react'
 import 'aos/dist/aos.css'
 
 // Registrasi ChartJS
@@ -77,7 +78,6 @@ export default function DashboardPage() {
         setKerusakan(await resKerusakan.json())
 
         const stat = await resStatistik.json()
-        // Pastikan semua nilai numerik
         setStatistik({
           totalPeminjaman: stat.totalPeminjaman || 0,
           fasilitasPerbaikan: stat.fasilitasPerbaikan || 0,
@@ -98,25 +98,58 @@ export default function DashboardPage() {
   }, [router])
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F9F8FD] text-black">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 text-black">
       <div className="flex flex-1 flex-col lg:flex-row">
         <Sidebar />
 
-        <main className="flex-1 p-6 space-y-10">
-          <h1 className="text-2xl font-semibold mb-4" data-aos="fade-right">
-            Selamat Datang, {namaUser || 'User'}!
-          </h1>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl shadow-xl p-6 sm:p-8 text-white" data-aos="fade-down">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
+                <span className="text-3xl">👋</span>
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold">Selamat Datang, {namaUser || 'Admin'}!</h1>
+                <p className="text-indigo-100 text-sm mt-1">Dashboard Admin SiFasBi</p>
+              </div>
+            </div>
+          </div>
 
           {/* Statistik Ringkas */}
           <div
-            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
             data-aos="fade-up"
             data-aos-delay="100"
           >
-            <StatBox title="Total Pengajuan Peminjaman" value={statistik.totalPeminjaman} />
-            <StatBox title="Fasilitas dalam Perbaikan" value={statistik.fasilitasPerbaikan} />
-            <StatBox title="Menunggu Persetujuan" value={statistik.menungguPersetujuan} />
-            <StatBox title="Laporan Kerusakan Aktif" value={statistik.laporanAktif} />
+            <StatBox 
+              title="Total Peminjaman" 
+              value={statistik.totalPeminjaman}
+              icon={<ClipboardList size={24} />}
+              color="from-blue-500 to-indigo-600"
+              bgColor="bg-blue-50"
+            />
+            <StatBox 
+              title="Dalam Perbaikan" 
+              value={statistik.fasilitasPerbaikan}
+              icon={<Wrench size={24} />}
+              color="from-orange-500 to-red-600"
+              bgColor="bg-orange-50"
+            />
+            <StatBox 
+              title="Menunggu Persetujuan" 
+              value={statistik.menungguPersetujuan}
+              icon={<Clock size={24} />}
+              color="from-amber-500 to-yellow-600"
+              bgColor="bg-amber-50"
+            />
+            <StatBox 
+              title="Laporan Aktif" 
+              value={statistik.laporanAktif}
+              icon={<CheckCircle size={24} />}
+              color="from-green-500 to-emerald-600"
+              bgColor="bg-green-50"
+            />
           </div>
 
           {/* Grafik */}
@@ -126,26 +159,50 @@ export default function DashboardPage() {
             data-aos-delay="200"
           >
             {/* Pie Chart */}
-            <ChartCard title="Fasilitas yang Paling Sering Dipinjam">
+            <ChartCard title="Fasilitas Populer" icon="📊">
               <Pie
                 data={{
                   labels: topFasilitas.map((item) => item.nama),
                   datasets: [
                     {
                       data: topFasilitas.map((item) => item.total),
-                      backgroundColor: ['#a78bfa', '#7c3aed', '#6d28d9', '#5b21b6']
+                      backgroundColor: [
+                        '#8B5CF6',
+                        '#6366F1', 
+                        '#EC4899',
+                        '#F59E0B',
+                        '#10B981'
+                      ],
+                      borderWidth: 3,
+                      borderColor: '#fff',
+                      hoverOffset: 10
                     }
                   ]
                 }}
                 options={{
                   maintainAspectRatio: false,
-                  plugins: { legend: { position: 'bottom' } }
+                  plugins: { 
+                    legend: { 
+                      position: 'bottom',
+                      labels: {
+                        padding: 15,
+                        font: { size: 12, weight: '500' },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                      }
+                    },
+                    tooltip: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      padding: 12,
+                      cornerRadius: 8
+                    }
+                  }
                 }}
               />
             </ChartCard>
 
             {/* Bar Chart */}
-            <ChartCard title="Jumlah Peminjaman / Bulan">
+            <ChartCard title="Tren Peminjaman Bulanan" icon="📈">
               <Bar
                 data={{
                   labels: peminjamanBulanan.map((item) => item.bulan),
@@ -153,20 +210,51 @@ export default function DashboardPage() {
                     {
                       label: 'Jumlah Peminjaman',
                       data: peminjamanBulanan.map((item) => item.jumlah),
-                      backgroundColor: '#7c3aed'
+                      backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                      borderColor: '#6366F1',
+                      borderWidth: 2,
+                      borderRadius: 8,
+                      hoverBackgroundColor: '#6366F1'
                     }
                   ]
                 }}
                 options={{
                   maintainAspectRatio: false,
-                  plugins: { legend: { display: false } }
+                  plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      padding: 12,
+                      cornerRadius: 8
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                      },
+                      ticks: {
+                        font: { size: 12, weight: '500' },
+                        color: '#6B7280'
+                      }
+                    },
+                    x: {
+                      grid: { display: false },
+                      ticks: {
+                        font: { size: 12, weight: '500' },
+                        color: '#6B7280'
+                      }
+                    }
+                  }
                 }}
               />
             </ChartCard>
           </div>
 
           {/* Tabel Peminjaman */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" data-aos="fade-up" data-aos-delay="300">
             <SectionTable
               title="Daftar Pengajuan Peminjaman Hari Ini"
               headers={['ID', 'Nama Peminjam', 'Fasilitas', 'Waktu Pinjam', 'Waktu Selesai', 'Status']}
@@ -183,7 +271,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Tabel Kerusakan */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" data-aos="fade-up" data-aos-delay="400">
             <SectionTable
               title="Daftar Pelaporan Kerusakan Hari Ini"
               headers={['ID', 'Pelapor', 'Fasilitas', 'Waktu Lapor', 'Ruangan', 'Status']}
@@ -206,25 +294,57 @@ export default function DashboardPage() {
   )
 }
 
-function StatBox({ title, value }: { title: string; value: number }) {
+function StatBox({ 
+  title, 
+  value, 
+  icon, 
+  color, 
+  bgColor 
+}: { 
+  title: string
+  value: number
+  icon: React.ReactNode
+  color: string
+  bgColor: string
+}) {
   return (
     <div
-      className="bg-white p-5 rounded-xl shadow-md text-center flex flex-col justify-center"
+      className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-5 border border-gray-100 group"
       data-aos="fade-up"
     >
-      <div className="text-2xl font-bold text-indigo-600">
-        {value ?? 0}
+      <div className="flex items-start justify-between mb-4">
+        <div className={`${bgColor} rounded-xl p-3 group-hover:scale-110 transition-transform duration-300`}>
+          <div className={`bg-gradient-to-br ${color} bg-clip-text text-transparent`}>
+            {icon}
+          </div>
+        </div>
+        <div className={`bg-gradient-to-br ${color} rounded-lg px-3 py-1`}>
+          <p className="text-white font-bold text-2xl">{value ?? 0}</p>
+        </div>
       </div>
-      <div className="text-sm text-gray-600">{title}</div>
+      <p className="text-gray-700 font-semibold text-sm">{title}</p>
     </div>
   )
 }
 
-function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+function ChartCard({ 
+  title, 
+  icon, 
+  children 
+}: { 
+  title: string
+  icon: string
+  children: React.ReactNode 
+}) {
   return (
-    <div className="bg-white p-5 rounded-xl shadow-md h-[320px] flex flex-col justify-between">
-      <h2 className="text-lg font-semibold mb-3">{title}</h2>
-      <div className="flex-1">{children}</div>
+    <div className="bg-white rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-gray-100">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-2.5">
+          <span className="text-white text-xl">{icon}</span>
+        </div>
+        <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+      </div>
+      <div className="h-[300px]">{children}</div>
     </div>
   )
 }
