@@ -23,7 +23,10 @@ export async function GET() {
         waktu_dibuat,
         ruangan,
         status,
-        nama_barang
+        nama_barang,
+        nama_siswa,
+        kelas,
+        jurusan
       `)
       .gte('waktu_dibuat', startOfWeek.toISOString())
       .order('waktu_dibuat', { ascending: false })

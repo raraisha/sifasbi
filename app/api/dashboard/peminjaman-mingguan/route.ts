@@ -12,9 +12,9 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from('peminjaman')
-      .select('id_peminjaman, nama_peminjam, nama_barang, waktu_mulai, waktu_selesai, status')
-      .gte('waktu_mulai', startOfWeek.toISOString())
-      .order('waktu_mulai', { ascending: false })
+      .select('id_peminjaman, nama_peminjam, nama_barang, tanggal_pengajuan, waktu_selesai, status')
+      .gte('tanggal_pengajuan', startOfWeek.toISOString())
+      .order('tanggal_pengajuan', { ascending: false })
 
     if (error) throw error
 

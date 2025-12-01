@@ -16,7 +16,7 @@ import {
 } from 'chart.js'
 import { Pie, Bar } from 'react-chartjs-2'
 import { useRouter } from 'next/navigation'
-import { ClipboardList, Wrench, Clock, CheckCircle } from 'lucide-react'
+import { ClipboardList, Wrench, Clock, CheckCircle, Sparkles, TrendingUp, Activity } from 'lucide-react'
 import 'aos/dist/aos.css'
 
 // Registrasi ChartJS
@@ -33,7 +33,7 @@ ChartJS.register(
 export default function DashboardPage() {
   const router = useRouter()
   const [peminjaman, setPeminjaman] = useState<any[]>([])
-  const [kerusakan, setKerusakan] = useState<any[]>([])
+  const [pelaporan_kerusakan, setKerusakan] = useState<any[]>([])
   const [statistik, setStatistik] = useState({
     totalPeminjaman: 0,
     fasilitasPerbaikan: 0,
@@ -98,25 +98,54 @@ export default function DashboardPage() {
   }, [router])
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 text-black">
-      <div className="flex flex-1 flex-col lg:flex-row">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 text-black relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-40 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="flex flex-1 flex-col lg:flex-row relative z-10">
         <Sidebar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl shadow-xl p-6 sm:p-8 text-white" data-aos="fade-down">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
-                <span className="text-3xl">👋</span>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
+          {/* Enhanced Header with Gradient Animation */}
+          <div 
+            className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl shadow-2xl p-6 sm:p-8 text-white overflow-hidden group" 
+            data-aos="fade-down"
+          >
+            {/* Animated gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/50 via-purple-600/50 to-pink-600/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            
+            {/* Floating orbs */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-2xl animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse animation-delay-2000"></div>
+            
+            <div className="relative flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-4">
+                <div className="bg-white/20 backdrop-blur-md rounded-2xl p-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Sparkles className="w-8 h-8 text-yellow-300 animate-pulse" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100">
+                    Selamat Datang, {namaUser || 'Admin'}!
+                  </h1>
+                  <p className="text-indigo-100 text-sm mt-1 flex items-center gap-2">
+                    <Activity className="w-4 h-4" />
+                    Dashboard Admin SiFasBi - Monitoring Real-time
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold">Selamat Datang, {namaUser || 'Admin'}!</h1>
-                <p className="text-indigo-100 text-sm mt-1">Dashboard Admin SiFasBi</p>
+              
+              <div className="bg-white/10 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20">
+                <p className="text-xs text-indigo-100">Tanggal Hari Ini</p>
+                <p className="font-semibold">{new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
             </div>
           </div>
 
-          {/* Statistik Ringkas */}
+          {/* Enhanced Stats Grid with Glassmorphism */}
           <div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
             data-aos="fade-up"
@@ -125,41 +154,45 @@ export default function DashboardPage() {
             <StatBox 
               title="Total Peminjaman" 
               value={statistik.totalPeminjaman}
-              icon={<ClipboardList size={24} />}
-              color="from-blue-500 to-indigo-600"
-              bgColor="bg-blue-50"
+              icon={<ClipboardList size={26} />}
+              color="from-blue-500 via-blue-600 to-indigo-700"
+              bgColor="bg-gradient-to-br from-blue-50 to-blue-100"
+              accentColor="blue"
             />
             <StatBox 
               title="Dalam Perbaikan" 
               value={statistik.fasilitasPerbaikan}
-              icon={<Wrench size={24} />}
-              color="from-orange-500 to-red-600"
-              bgColor="bg-orange-50"
+              icon={<Wrench size={26} />}
+              color="from-orange-500 via-red-500 to-red-700"
+              bgColor="bg-gradient-to-br from-orange-50 to-red-100"
+              accentColor="orange"
             />
             <StatBox 
               title="Menunggu Persetujuan" 
               value={statistik.menungguPersetujuan}
-              icon={<Clock size={24} />}
-              color="from-amber-500 to-yellow-600"
-              bgColor="bg-amber-50"
+              icon={<Clock size={26} />}
+              color="from-amber-500 via-yellow-500 to-yellow-700"
+              bgColor="bg-gradient-to-br from-amber-50 to-yellow-100"
+              accentColor="yellow"
             />
             <StatBox 
               title="Laporan Aktif" 
               value={statistik.laporanAktif}
-              icon={<CheckCircle size={24} />}
-              color="from-green-500 to-emerald-600"
-              bgColor="bg-green-50"
+              icon={<CheckCircle size={26} />}
+              color="from-green-500 via-emerald-500 to-teal-700"
+              bgColor="bg-gradient-to-br from-green-50 to-emerald-100"
+              accentColor="green"
             />
           </div>
 
-          {/* Grafik */}
+          {/* Enhanced Charts Section */}
           <div
             className="grid grid-cols-1 lg:grid-cols-2 gap-6"
             data-aos="fade-up"
             data-aos-delay="200"
           >
-            {/* Pie Chart */}
-            <ChartCard title="Fasilitas Populer" icon="📊">
+            {/* Pie Chart with Glow Effect */}
+            <ChartCard title="Fasilitas Populer" icon="📊" gradient="from-purple-500 to-pink-600">
               <Pie
                 data={{
                   labels: topFasilitas.map((item) => item.nama),
@@ -173,9 +206,10 @@ export default function DashboardPage() {
                         '#F59E0B',
                         '#10B981'
                       ],
-                      borderWidth: 3,
+                      borderWidth: 4,
                       borderColor: '#fff',
-                      hoverOffset: 10
+                      hoverOffset: 15,
+                      hoverBorderWidth: 5
                     }
                   ]
                 }}
@@ -185,24 +219,29 @@ export default function DashboardPage() {
                     legend: { 
                       position: 'bottom',
                       labels: {
-                        padding: 15,
-                        font: { size: 12, weight: '500' },
+                        padding: 20,
+                        font: { size: 13, weight: '600' },
                         usePointStyle: true,
-                        pointStyle: 'circle'
+                        pointStyle: 'circle',
+                        color: '#374151'
                       }
                     },
                     tooltip: {
-                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                      padding: 12,
-                      cornerRadius: 8
+                      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                      padding: 16,
+                      cornerRadius: 12,
+                      titleFont: { size: 14, weight: 'bold' },
+                      bodyFont: { size: 13 },
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                      borderWidth: 1
                     }
                   }
                 }}
               />
             </ChartCard>
 
-            {/* Bar Chart */}
-            <ChartCard title="Tren Peminjaman Bulanan" icon="📈">
+            {/* Bar Chart with Gradient */}
+            <ChartCard title="Tren Peminjaman Bulanan" icon="📈" gradient="from-indigo-500 to-blue-600">
               <Bar
                 data={{
                   labels: peminjamanBulanan.map((item) => item.bulan),
@@ -210,11 +249,12 @@ export default function DashboardPage() {
                     {
                       label: 'Jumlah Peminjaman',
                       data: peminjamanBulanan.map((item) => item.jumlah),
-                      backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                      backgroundColor: 'rgba(99, 102, 241, 0.9)',
                       borderColor: '#6366F1',
-                      borderWidth: 2,
-                      borderRadius: 8,
-                      hoverBackgroundColor: '#6366F1'
+                      borderWidth: 0,
+                      borderRadius: 12,
+                      hoverBackgroundColor: '#4F46E5',
+                      barThickness: 40
                     }
                   ]
                 }}
@@ -223,28 +263,34 @@ export default function DashboardPage() {
                   plugins: { 
                     legend: { display: false },
                     tooltip: {
-                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                      padding: 12,
-                      cornerRadius: 8
+                      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                      padding: 16,
+                      cornerRadius: 12,
+                      titleFont: { size: 14, weight: 'bold' },
+                      bodyFont: { size: 13 },
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                      borderWidth: 1
                     }
                   },
                   scales: {
                     y: {
                       beginAtZero: true,
                       grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
+                        color: 'rgba(99, 102, 241, 0.1)',
                         drawBorder: false
                       },
                       ticks: {
-                        font: { size: 12, weight: '500' },
-                        color: '#6B7280'
+                        font: { size: 12, weight: '600' },
+                        color: '#6B7280',
+                        padding: 10
                       }
                     },
                     x: {
                       grid: { display: false },
                       ticks: {
-                        font: { size: 12, weight: '500' },
-                        color: '#6B7280'
+                        font: { size: 12, weight: '600' },
+                        color: '#6B7280',
+                        padding: 10
                       }
                     }
                   }
@@ -253,16 +299,16 @@ export default function DashboardPage() {
             </ChartCard>
           </div>
 
-          {/* Tabel Peminjaman */}
+          {/* Enhanced Tables Section */}
           <div className="overflow-x-auto" data-aos="fade-up" data-aos-delay="300">
             <SectionTable
-              title="Daftar Pengajuan Peminjaman Hari Ini"
+              title="Daftar Pengajuan Peminjaman Minggu Ini"
               headers={['ID', 'Nama Peminjam', 'Fasilitas', 'Waktu Pinjam', 'Waktu Selesai', 'Status']}
               rows={peminjaman.map((p) => [
                 p.id_peminjaman,
                 p.nama_peminjam,
-                p.fasilitas,
-                formatWaktu(p.waktu_pinjam),
+                p.nama_barang,
+                formatWaktu(p.tanggal_pengajuan),
                 formatWaktu(p.waktu_selesai),
                 p.status
               ])}
@@ -270,16 +316,15 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Tabel Kerusakan */}
           <div className="overflow-x-auto" data-aos="fade-up" data-aos-delay="400">
             <SectionTable
-              title="Daftar Pelaporan Kerusakan Hari Ini"
-              headers={['ID', 'Pelapor', 'Fasilitas', 'Waktu Lapor', 'Ruangan', 'Status']}
-              rows={kerusakan.map((k) => [
-                k.id_laporan,
+              title="Daftar Pelaporan Kerusakan Minggu Ini"
+              headers={['ID', 'Nama', 'Fasilitas', 'Waktu Lapor', 'Ruangan', 'Status']}
+              rows={pelaporan_kerusakan.map((k) => [
+                k.id_pelaporan,
                 k.nama_siswa,
-                k.fasilitas,
-                formatWaktu(k.waktu_lapor),
+                k.nama_barang,
+                formatWaktu(k.waktu_dibuat),
                 k.ruangan,
                 k.status
               ])}
@@ -290,6 +335,24 @@ export default function DashboardPage() {
       </div>
 
       <Footer />
+
+      <style jsx global>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   )
 }
@@ -299,30 +362,42 @@ function StatBox({
   value, 
   icon, 
   color, 
-  bgColor 
+  bgColor,
+  accentColor 
 }: { 
   title: string
   value: number
   icon: React.ReactNode
   color: string
   bgColor: string
+  accentColor: string
 }) {
   return (
     <div
-      className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-5 border border-gray-100 group"
+      className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 p-6 border border-white/40 group overflow-hidden"
       data-aos="fade-up"
     >
-      <div className="flex items-start justify-between mb-4">
-        <div className={`${bgColor} rounded-xl p-3 group-hover:scale-110 transition-transform duration-300`}>
+      {/* Glow effect on hover */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`}></div>
+      
+      {/* Animated corner accent */}
+      <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${color} opacity-20 rounded-bl-full transform translate-x-10 -translate-y-10 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500`}></div>
+      
+      <div className="relative flex items-start justify-between mb-4">
+        <div className={`${bgColor} rounded-2xl p-4 shadow-md group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
           <div className={`bg-gradient-to-br ${color} bg-clip-text text-transparent`}>
             {icon}
           </div>
         </div>
-        <div className={`bg-gradient-to-br ${color} rounded-lg px-3 py-1`}>
-          <p className="text-white font-bold text-2xl">{value ?? 0}</p>
+        <div className={`bg-gradient-to-br ${color} rounded-xl px-4 py-2 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+          <p className="text-white font-bold text-3xl">{value ?? 0}</p>
         </div>
       </div>
-      <p className="text-gray-700 font-semibold text-sm">{title}</p>
+      
+      <div className="relative">
+        <p className="text-gray-700 font-bold text-sm">{title}</p>
+        <div className={`h-1 w-0 group-hover:w-full bg-gradient-to-r ${color} rounded-full transition-all duration-500 mt-2`}></div>
+      </div>
     </div>
   )
 }
@@ -330,21 +405,36 @@ function StatBox({
 function ChartCard({ 
   title, 
   icon, 
+  gradient,
   children 
 }: { 
   title: string
   icon: string
+  gradient: string
   children: React.ReactNode 
 }) {
   return (
-    <div className="bg-white rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-gray-100">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-2.5">
-          <span className="text-white text-xl">{icon}</span>
+    <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 p-6 border border-white/50 group overflow-hidden">
+      {/* Gradient accent bar */}
+      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${gradient} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500`}></div>
+      
+      {/* Corner decoration */}
+      <div className={`absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl ${gradient} opacity-5 rounded-tl-full transform translate-x-16 translate-y-16 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-700`}></div>
+      
+      <div className="relative flex items-center gap-3 mb-6">
+        <div className={`bg-gradient-to-br ${gradient} rounded-2xl p-3 shadow-lg group-hover:scale-110 group-hover:rotate-12 transition-all duration-500`}>
+          <span className="text-white text-2xl">{icon}</span>
         </div>
-        <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+          <div className="flex items-center gap-1 mt-1">
+            <TrendingUp className="w-4 h-4 text-green-500" />
+            <span className="text-xs text-gray-500 font-medium">Data Terkini</span>
+          </div>
+        </div>
       </div>
-      <div className="h-[300px]">{children}</div>
+      
+      <div className="relative h-[300px]">{children}</div>
     </div>
   )
 }
